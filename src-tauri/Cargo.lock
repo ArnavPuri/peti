@@ -549,6 +549,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "directories"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "16f5094c54661b38d03bd7e50df373292118db60b585c08a411c6d840017fe7d"
+dependencies = [
+ "dirs-sys",
+]
+
+[[package]]
 name = "dirs"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2129,11 +2138,13 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 name = "peti"
 version = "0.0.0"
 dependencies = [
+ "directories",
  "portable-pty",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
+ "toml 1.1.2+spec-1.1.0",
 ]
 
 [[package]]

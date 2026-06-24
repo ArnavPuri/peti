@@ -1,5 +1,6 @@
 use tauri::{AppHandle, State};
 
+use crate::config::workspace as ws;
 use crate::pty::PtyManager;
 
 #[tauri::command]
@@ -13,7 +14,30 @@ pub fn spawn_pane(
     cols: u16,
     rows: u16,
 ) -> Result<(), String> {
+    let cwd = crate::config::expand_tilde(&cwd)
+        .to_string_lossy()
+        .into_owned();
     manager.spawn(app, session_id, cwd, command, args, cols, rows)
+}
+
+#[tauri::command]
+pub fn list_workspaces() -> Vec<ws::WorkspaceSummary> {
+    ws::list_workspaces()
+}
+
+#[tauri::command]
+pub fn get_workspace(id: String) -> Result<ws::Workspace, String> {
+    ws::get_workspace(&id)
+}
+
+#[tauri::command]
+pub fn save_layout(id: String, sizes: Vec<f64>) -> Result<(), String> {
+    ws::save_layout(&id, sizes)
+}
+
+#[tauri::command]
+pub fn add_workspace_pointer(path: String) -> Result<(), String> {
+    ws::add_workspace_pointer(path)
 }
 
 #[tauri::command]

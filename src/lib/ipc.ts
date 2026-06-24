@@ -50,3 +50,47 @@ export function onPaneOutput(cb: (p: OutputPayload) => void): Promise<UnlistenFn
 export function onPaneExit(cb: (p: ExitPayload) => void): Promise<UnlistenFn> {
   return listen<ExitPayload>("pane://exit", (e) => cb(e.payload));
 }
+
+// ---- workspaces -----------------------------------------------------------
+
+export type PaneType = "claude" | "shell";
+
+export interface PaneDef {
+  label: string;
+  path: string;
+  type: PaneType;
+  command: string | null;
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
+  background: string | null;
+  accent: string | null;
+  panes: PaneDef[];
+  sizes: number[]; // fractions, one per pane
+}
+
+export interface WorkspaceSummary {
+  id: string;
+  name: string;
+  accent: string | null;
+  background: string | null;
+  pane_count: number;
+}
+
+export function listWorkspaces(): Promise<WorkspaceSummary[]> {
+  return invoke("list_workspaces");
+}
+
+export function getWorkspace(id: string): Promise<Workspace> {
+  return invoke("get_workspace", { id });
+}
+
+export function saveLayout(id: string, sizes: number[]): Promise<void> {
+  return invoke("save_layout", { id, sizes });
+}
+
+export function addWorkspacePointer(path: string): Promise<void> {
+  return invoke("add_workspace_pointer", { path });
+}
