@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { getSettings, saveSettings, type AppSettings } from "../lib/ipc";
+import { applyTheme } from "../lib/theme";
 
 const PERMISSION_MODES = ["", "default", "acceptEdits", "plan", "bypassPermissions"];
 
@@ -10,6 +11,7 @@ export default function Settings() {
     default_model: "",
     permission_mode: "",
     alerts: true,
+    theme: "dark",
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,22 @@ export default function Settings() {
               {m === "" ? "(unset)" : m}
             </option>
           ))}
+        </select>
+      </label>
+
+      <label className="field">
+        <span>Theme</span>
+        <select
+          value={settings.theme}
+          onChange={(e) => {
+            const theme = e.target.value as AppSettings["theme"];
+            patch({ theme });
+            applyTheme(theme); // live preview
+          }}
+        >
+          <option value="system">System</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
         </select>
       </label>
 

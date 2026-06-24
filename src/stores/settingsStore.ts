@@ -6,6 +6,7 @@ const DEFAULTS: AppSettings = {
   default_model: "",
   permission_mode: "",
   alerts: true,
+  theme: "dark",
 };
 
 interface SettingsState {

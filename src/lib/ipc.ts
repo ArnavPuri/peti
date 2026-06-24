@@ -191,6 +191,7 @@ export interface AppSettings {
   default_model: string;
   permission_mode: string;
   alerts: boolean;
+  theme: "system" | "dark" | "light";
 }
 
 export function getSettings(): Promise<AppSettings> {

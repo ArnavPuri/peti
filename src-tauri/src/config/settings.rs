@@ -14,6 +14,7 @@ pub struct AppSettings {
     pub default_model: String,   // e.g. "opus" | "sonnet" | ""
     pub permission_mode: String, // e.g. "default" | "acceptEdits" | "plan" | ""
     pub alerts: bool,            // desktop notification + chime when Claude awaits you
+    pub theme: String,           // "system" | "dark" | "light"
 }
 
 impl Default for AppSettings {
@@ -23,6 +24,7 @@ impl Default for AppSettings {
             default_model: String::new(),
             permission_mode: String::new(),
             alerts: true,
+            theme: "dark".into(),
         }
     }
 }
