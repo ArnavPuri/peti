@@ -38,6 +38,10 @@ pub struct PaneDef {
     pub pane_type: PaneType,
     #[serde(default)]
     pub command: Option<String>,
+    /// When true (claude panes), spawn with `--continue` to resume the last
+    /// session in this dir.
+    #[serde(default)]
+    pub resume: bool,
     #[serde(default)]
     pub rect: Option<RectToml>,
 }
@@ -79,6 +83,7 @@ pub struct Workspace {
     pub accent: Option<String>,
     pub panes: Vec<PaneDef>,
     pub rects: Vec<Rect>, // aligned with `panes` by index
+    pub note: Rect,       // geometry of the floating task note
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -96,9 +101,17 @@ struct PointerEntry {
     path: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct LayoutJson {
+    #[serde(default)]
     panes: Vec<Rect>,
+    #[serde(default)]
+    note: Option<Rect>,
+}
+
+fn default_note_rect() -> Rect {
+    // Top-right by default, like the reference shot's agenda note.
+    Rect { x: 0.66, y: 0.08, w: 0.30, h: 0.42, z: 100 }
 }
 
 // ---- pure helpers (unit-tested) -------------------------------------------
@@ -211,10 +224,20 @@ fn layout_path(id: &str) -> Result<PathBuf, String> {
     Ok(workspaces_dir()?.join(format!("{id}.layout.json")))
 }
 
-fn read_layout(id: &str) -> Option<Vec<Rect>> {
-    let contents = fs::read_to_string(layout_path(id).ok()?).ok()?;
-    let parsed: LayoutJson = serde_json::from_str(&contents).ok()?;
-    Some(parsed.panes)
+fn read_layout_json(id: &str) -> LayoutJson {
+    let Ok(path) = layout_path(id) else {
+        return LayoutJson::default();
+    };
+    fs::read_to_string(path)
+        .ok()
+        .and_then(|c| serde_json::from_str(&c).ok())
+        .unwrap_or_default()
+}
+
+fn write_layout_json(id: &str, layout: &LayoutJson) -> Result<(), String> {
+    super::ensure_dirs()?;
+    let json = serde_json::to_string_pretty(layout).map_err(|e| e.to_string())?;
+    fs::write(layout_path(id)?, json).map_err(|e| e.to_string())
 }
 
 fn read_registry() -> Vec<PointerEntry> {
@@ -246,7 +269,14 @@ pub fn get_workspace(id: &str) -> Result<Workspace, String> {
         .find(|f| f.workspace.id == id)
         .ok_or_else(|| format!("workspace not found: {id}"))?;
 
-    let rects = resolve_rects(&file, read_layout(id));
+    let layout = read_layout_json(id);
+    let live = if layout.panes.is_empty() {
+        None
+    } else {
+        Some(layout.panes.clone())
+    };
+    let rects = resolve_rects(&file, live);
+    let note = layout.note.unwrap_or_else(default_note_rect);
     let background = resolve_background(file.workspace.background.as_deref());
 
     Ok(Workspace {
@@ -256,13 +286,22 @@ pub fn get_workspace(id: &str) -> Result<Workspace, String> {
         accent: file.workspace.accent,
         panes: file.pane,
         rects,
+        note,
     })
 }
 
+/// Persist pane geometry, preserving the saved note rect.
 pub fn save_layout(id: &str, panes: Vec<Rect>) -> Result<(), String> {
-    super::ensure_dirs()?;
-    let json = serde_json::to_string_pretty(&LayoutJson { panes }).map_err(|e| e.to_string())?;
-    fs::write(layout_path(id)?, json).map_err(|e| e.to_string())
+    let mut layout = read_layout_json(id);
+    layout.panes = panes;
+    write_layout_json(id, &layout)
+}
+
+/// Persist the note geometry, preserving the saved pane rects.
+pub fn save_note_rect(id: &str, note: Rect) -> Result<(), String> {
+    let mut layout = read_layout_json(id);
+    layout.note = Some(note);
+    write_layout_json(id, &layout)
 }
 
 /// Register an in-repo `.peti/workspace.toml` by absolute path. Validates that

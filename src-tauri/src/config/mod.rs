@@ -7,6 +7,7 @@ use std::path::PathBuf;
 
 use directories::{BaseDirs, ProjectDirs};
 
+pub mod tasks;
 pub mod workspace;
 
 pub fn config_root() -> Result<PathBuf, String> {

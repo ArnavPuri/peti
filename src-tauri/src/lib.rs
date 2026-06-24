@@ -48,8 +48,11 @@ pub fn run() {
             commands::list_workspaces,
             commands::get_workspace,
             commands::save_layout,
+            commands::save_note_rect,
             commands::add_workspace_pointer,
             commands::open_peti,
+            commands::list_tasks,
+            commands::save_tasks,
         ])
         .on_window_event(|window, event| {
             // Orphan cleanup (PRD §3.2), window-scoped: a Peti window closing

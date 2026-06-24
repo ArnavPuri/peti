@@ -1,5 +1,6 @@
 use tauri::{AppHandle, State};
 
+use crate::config::tasks::{self, Task};
 use crate::config::workspace as ws;
 use crate::pty::PtyManager;
 
@@ -41,8 +42,23 @@ pub fn add_workspace_pointer(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn save_note_rect(id: String, note: ws::Rect) -> Result<(), String> {
+    ws::save_note_rect(&id, note)
+}
+
+#[tauri::command]
 pub fn open_peti(app: AppHandle, id: String) -> Result<(), String> {
     crate::window::open_peti_window(&app, &id)
+}
+
+#[tauri::command]
+pub fn list_tasks(id: String) -> Vec<Task> {
+    tasks::list_tasks(&id)
+}
+
+#[tauri::command]
+pub fn save_tasks(id: String, tasks: Vec<Task>) -> Result<(), String> {
+    crate::config::tasks::save_tasks(&id, tasks)
 }
 
 #[tauri::command]

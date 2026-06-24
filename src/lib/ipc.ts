@@ -60,6 +60,7 @@ export interface PaneDef {
   path: string;
   type: PaneType;
   command: string | null;
+  resume: boolean;
 }
 
 // Floating-card geometry: fractions of the canvas (0–1); z is stacking order.
@@ -78,6 +79,7 @@ export interface Workspace {
   accent: string | null;
   panes: PaneDef[];
   rects: Rect[]; // aligned with panes by index
+  note: Rect; // geometry of the floating task note
 }
 
 export function getWorkspace(id: string): Promise<Workspace> {
@@ -88,10 +90,31 @@ export function saveLayout(id: string, panes: Rect[]): Promise<void> {
   return invoke("save_layout", { id, panes });
 }
 
+export function saveNoteRect(id: string, note: Rect): Promise<void> {
+  return invoke("save_note_rect", { id, note });
+}
+
 export function openPeti(id: string): Promise<void> {
   return invoke("open_peti", { id });
 }
 
 export function addWorkspacePointer(path: string): Promise<void> {
   return invoke("add_workspace_pointer", { path });
+}
+
+// ---- tasks ----------------------------------------------------------------
+
+export interface Task {
+  id: string;
+  text: string;
+  done: boolean;
+  order: number;
+}
+
+export function listTasks(id: string): Promise<Task[]> {
+  return invoke("list_tasks", { id });
+}
+
+export function saveTasks(id: string, tasks: Task[]): Promise<void> {
+  return invoke("save_tasks", { id, tasks });
 }

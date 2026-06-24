@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Background from "./components/Background";
 import FloatingCanvas from "./components/FloatingCanvas";
+import PromptBar from "./components/PromptBar";
 import { useWorkspaceStore } from "./stores/workspaceStore";
 
 // Which Peti this window is, from `index.html?peti=<id>` set by the backend.
@@ -38,6 +39,7 @@ export default function App() {
     <div className="peti">
       <Background workspace={workspace} />
       <FloatingCanvas workspace={workspace} />
+      <PromptBar workspace={workspace} />
     </div>
   );
 }

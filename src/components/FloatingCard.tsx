@@ -1,42 +1,41 @@
-import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
-import Terminal from "./Terminal";
+import {
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
 import type { Rect } from "../lib/ipc";
 
 interface Props {
   rect: Rect;
   canvas: { w: number; h: number };
   accent: string;
-  label: string;
-  sessionId: string;
-  cwd: string;
-  command: string;
-  args: string[];
+  title: ReactNode;
+  children: ReactNode;
+  variant?: "terminal" | "note";
   onCommit: (rect: Rect) => void;
   onFocus: () => void;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const MIN_W = 0.15;
-const MIN_H = 0.15;
+const MIN_H = 0.12;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 
-// A draggable / resizable translucent terminal card.
-//
-// Smoothness: the gesture runs *imperatively* — pointermove mutates the card's
-// transform/size directly on the DOM node (no React re-render per frame) and we
-// commit to React state once, on release. Position uses GPU-composited
-// translate3d (not left/top), and blur is dropped mid-gesture (the `.gesturing`
-// class) so the backdrop isn't re-sampled every frame.
-export default function FloatingPane(props: Props) {
-  const { rect, canvas, accent, label, onCommit, onFocus, onClose } = props;
+// A draggable / resizable translucent card. The gesture runs imperatively —
+// pointermove mutates the node's transform/size directly (no React re-render
+// per frame) and commits to state once on release. Position is GPU-composited
+// translate3d; blur is dropped mid-gesture (`.gesturing`) so the backdrop isn't
+// re-sampled every frame.
+export default function FloatingCard(props: Props) {
+  const { rect, canvas, accent, title, children, onCommit, onFocus, onClose } = props;
   const cardRef = useRef<HTMLDivElement>(null);
   const [gesturing, setGesturing] = useState(false);
 
-  // Live geometry during a gesture. Re-synced from props on every render (which
-  // never happens mid-gesture, since moves are imperative).
   const live = useRef<Rect>(rect);
-  live.current = rect;
+  live.current = rect; // re-synced each render (never happens mid-gesture)
 
   const drag = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
   const resize = useRef<{ px: number; py: number; ow: number; oh: number } | null>(null);
@@ -114,7 +113,7 @@ export default function FloatingPane(props: Props) {
   return (
     <div
       ref={cardRef}
-      className={`pane-card${gesturing ? " gesturing" : ""}`}
+      className={`pane-card pane-card--${props.variant ?? "terminal"}${gesturing ? " gesturing" : ""}`}
       style={style}
       onPointerDown={onFocus}
     >
@@ -125,25 +124,20 @@ export default function FloatingPane(props: Props) {
         onPointerUp={endDrag}
       >
         <span className="pane-card-dot" style={{ background: accent }} />
-        <span className="pane-card-label">{label}</span>
-        <button
-          className="pane-card-close"
-          title="Close pane"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={onClose}
-        >
-          ×
-        </button>
+        <span className="pane-card-label">{title}</span>
+        {onClose && (
+          <button
+            className="pane-card-close"
+            title="Close"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={onClose}
+          >
+            ×
+          </button>
+        )}
       </div>
 
-      <div className="pane-card-body">
-        <Terminal
-          sessionId={props.sessionId}
-          cwd={props.cwd}
-          command={props.command}
-          args={props.args}
-        />
-      </div>
+      <div className="pane-card-body">{children}</div>
 
       <div
         className="pane-card-resize"

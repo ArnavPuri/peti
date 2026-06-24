@@ -164,3 +164,181 @@ body {
   touch-action: none;
   background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.25) 50%);
 }
+
+/* ---- task note card ---- */
+
+.pane-card--note {
+  background: rgba(26, 22, 14, 0.74);
+}
+
+.pane-card--note.gesturing {
+  background: rgba(26, 22, 14, 0.92);
+}
+
+.note {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-size: 12px;
+}
+
+.note-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.note-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  border-radius: 5px;
+}
+
+.note-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.note-item.done .note-text {
+  text-decoration: line-through;
+  color: #6b7480;
+}
+
+.note-text {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  color: #e6e6e6;
+  font: inherit;
+  padding: 2px;
+}
+
+.note-text:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+}
+
+.note-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+}
+
+.note-item:hover .note-actions {
+  opacity: 1;
+}
+
+.note-actions button {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #8b93a0;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.note-actions button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.note-actions button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.note-empty {
+  color: #6b7480;
+  padding: 6px;
+}
+
+.note-add {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px;
+}
+
+.note-add input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #e6e6e6;
+  font: inherit;
+  padding: 4px;
+}
+
+.note-add input:focus {
+  outline: none;
+}
+
+/* ---- prompt bar ---- */
+
+.promptbar {
+  position: absolute;
+  z-index: 9000;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  width: min(680px, 80%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(13, 15, 18, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5);
+}
+
+.promptbar-mode {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #c8ccd2;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.promptbar-mode:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.promptbar-input {
+  flex: 1;
+  resize: none;
+  max-height: 120px;
+  background: transparent;
+  border: none;
+  color: #e6e6e6;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 6px 2px;
+}
+
+.promptbar-input:focus {
+  outline: none;
+}
+
+.promptbar-target {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #6b7480;
+  padding-right: 4px;
+}
