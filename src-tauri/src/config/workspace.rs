@@ -107,6 +107,10 @@ struct LayoutJson {
     panes: Vec<Rect>,
     #[serde(default)]
     note: Option<Rect>,
+    /// Live background override (wins over the TOML's authored background).
+    /// "" = accent gradient, "preset:<id>" = bundled gradient, else an image path.
+    #[serde(default)]
+    background: Option<String>,
 }
 
 fn default_note_rect() -> Rect {
@@ -159,12 +163,15 @@ fn resolve_rects(file: &WorkspaceFile, live: Option<Vec<Rect>>) -> Vec<Rect> {
         .collect()
 }
 
-/// Resolve a workspace's `background` (relative-to-config, `~`, or absolute) to
-/// an absolute path string.
+/// Resolve a background spec. "" -> None (accent gradient); "preset:<id>" passes
+/// through; otherwise it's an image path resolved to absolute.
 fn resolve_background(raw: Option<&str>) -> Option<String> {
-    let raw = raw?;
+    let raw = raw?.trim();
     if raw.is_empty() {
         return None;
+    }
+    if raw.starts_with("preset:") {
+        return Some(raw.to_string());
     }
     let expanded = expand_tilde(raw);
     let path = if expanded.is_absolute() {
@@ -277,7 +284,12 @@ pub fn get_workspace(id: &str) -> Result<Workspace, String> {
     };
     let rects = resolve_rects(&file, live);
     let note = layout.note.unwrap_or_else(default_note_rect);
-    let background = resolve_background(file.workspace.background.as_deref());
+    // Live override (layout.json) wins over the authored TOML background.
+    let bg_spec = layout
+        .background
+        .as_deref()
+        .or(file.workspace.background.as_deref());
+    let background = resolve_background(bg_spec);
 
     Ok(Workspace {
         id: file.workspace.id,
@@ -302,6 +314,23 @@ pub fn save_note_rect(id: &str, note: Rect) -> Result<(), String> {
     let mut layout = read_layout_json(id);
     layout.note = Some(note);
     write_layout_json(id, &layout)
+}
+
+/// Set the live background override ("" / "preset:<id>" / image path).
+pub fn save_background(id: &str, spec: String) -> Result<(), String> {
+    let mut layout = read_layout_json(id);
+    layout.background = Some(spec);
+    write_layout_json(id, &layout)
+}
+
+/// Drop the live override so the TOML's authored background takes over again.
+pub fn clear_background_override(id: &str) -> Result<(), String> {
+    let mut layout = read_layout_json(id);
+    if layout.background.is_some() {
+        layout.background = None;
+        write_layout_json(id, &layout)?;
+    }
+    Ok(())
 }
 
 // ---- create / edit / delete (in-app editor) -------------------------------

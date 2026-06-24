@@ -109,6 +109,11 @@ export function saveNoteRect(id: string, note: Rect): Promise<void> {
   return invoke("save_note_rect", { id, note });
 }
 
+// spec: "" (accent gradient) | "preset:<id>" | image path
+export function saveBackground(id: string, spec: string): Promise<void> {
+  return invoke("save_background", { id, spec });
+}
+
 export function openPeti(id: string): Promise<void> {
   return invoke("open_peti", { id });
 }

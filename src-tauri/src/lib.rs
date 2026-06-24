@@ -63,6 +63,7 @@ pub fn run() {
             commands::get_workspace,
             commands::save_layout,
             commands::save_note_rect,
+            commands::save_background,
             commands::add_workspace_pointer,
             commands::open_peti,
             commands::list_tasks,

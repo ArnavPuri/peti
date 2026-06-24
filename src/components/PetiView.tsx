@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import Background from "./Background";
+import BackgroundSwitcher from "./BackgroundSwitcher";
 import FloatingCanvas from "./FloatingCanvas";
 import PromptBar from "./PromptBar";
 import { useWorkspaceStore } from "../stores/workspaceStore";
@@ -79,6 +80,7 @@ export default function PetiView({ petiId }: { petiId: string | null }) {
     <div className="peti">
       <Background workspace={workspace} />
       <FloatingCanvas workspace={workspace} />
+      <BackgroundSwitcher />
       <PromptBar workspace={workspace} />
     </div>
   );

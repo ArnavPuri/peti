@@ -322,6 +322,87 @@ body {
   outline: none;
 }
 
+/* ---- background switcher ---- */
+
+.bgswitch {
+  position: absolute;
+  z-index: 9000;
+  left: 16px;
+  bottom: 18px;
+}
+
+.bgswitch-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(13, 15, 18, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+.bgswitch-btn:hover {
+  background: rgba(28, 33, 40, 0.9);
+}
+
+.bgswitch-pop {
+  position: absolute;
+  bottom: 44px;
+  left: 0;
+  width: 224px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(13, 15, 18, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.bgswitch-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.bgswitch-swatch {
+  height: 38px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  padding: 0;
+  background-size: cover;
+}
+
+.bgswitch-swatch:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.bgswitch-swatch.active {
+  border-color: #5cd6ae;
+  box-shadow: 0 0 0 1px #5cd6ae;
+}
+
+.bgswitch-image {
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #c8ccd2;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.bgswitch-image:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 /* ---- prompt bar ---- */
 
 .promptbar {

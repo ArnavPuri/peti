@@ -73,8 +73,14 @@ pub fn save_tasks(id: String, tasks: Vec<Task>) -> Result<(), String> {
 #[tauri::command]
 pub fn save_workspace(app: AppHandle, workspace: ws::WorkspaceInput) -> Result<String, String> {
     let id = ws::save_workspace(workspace)?;
+    let _ = ws::clear_background_override(&id); // editor's TOML background is authoritative
     crate::window::build_menu(&app)?; // surface the new/renamed Peti in the menu
     Ok(id)
+}
+
+#[tauri::command]
+pub fn save_background(id: String, spec: String) -> Result<(), String> {
+    ws::save_background(&id, spec)
 }
 
 #[tauri::command]
