@@ -78,9 +78,9 @@ pub fn open_settings_window(app: &AppHandle) -> Result<(), String> {
 pub fn build_menu(app: &AppHandle) -> Result<(), String> {
     let workspaces = ws::list_workspaces();
 
-    let new_item = MenuItem::with_id(app, "new-peti", "New Peti…", true, None::<&str>)
+    let new_item = MenuItem::with_id(app, "new-peti", "New Peti…", true, Some("CmdOrCtrl+N"))
         .map_err(|e| e.to_string())?;
-    let settings_item = MenuItem::with_id(app, "settings", "Settings…", true, None::<&str>)
+    let settings_item = MenuItem::with_id(app, "settings", "Settings…", true, Some("CmdOrCtrl+,"))
         .map_err(|e| e.to_string())?;
 
     let mut open_sub = SubmenuBuilder::new(app, "Open");

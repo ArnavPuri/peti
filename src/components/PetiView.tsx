@@ -7,7 +7,7 @@ import { useWorkspaceStore } from "../stores/workspaceStore";
 import { useSettingsStore } from "../stores/settingsStore";
 import { useSessionsStore } from "../stores/sessionsStore";
 import { useUiStore } from "../stores/uiStore";
-import { onSessionStatus } from "../lib/ipc";
+import { onSessionStatus, openEditor } from "../lib/ipc";
 import { chime, ensureNotifyPermission, notify } from "../lib/alerts";
 
 // A single self-contained Peti window.
@@ -60,7 +60,11 @@ export default function PetiView({ petiId }: { petiId: string | null }) {
   if (!petiId) {
     return (
       <div className="empty-stage">
-        No Peti selected. Create one from the <b>Peti ▸ New Peti…</b> menu.
+        <p>No Peti open yet.</p>
+        <button className="btn-primary empty-new" onClick={() => void openEditor("new")}>
+          ＋ New Peti
+        </button>
+        <p className="settings-note">…or pick one from the Peti menu.</p>
       </div>
     );
   }

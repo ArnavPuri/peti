@@ -67,6 +67,7 @@ pub fn run() {
             commands::save_background,
             commands::add_workspace_pointer,
             commands::open_peti,
+            commands::open_editor,
             commands::list_tasks,
             commands::save_tasks,
             commands::save_workspace,

@@ -61,6 +61,11 @@ pub fn open_peti(app: AppHandle, id: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn open_editor(app: AppHandle, target: String) -> Result<(), String> {
+    crate::window::open_editor_window(&app, &target)
+}
+
+#[tauri::command]
 pub fn list_tasks(id: String) -> Vec<Task> {
     tasks::list_tasks(&id)
 }

@@ -129,6 +129,10 @@ export function openPeti(id: string): Promise<void> {
   return invoke("open_peti", { id });
 }
 
+export function openEditor(target: string): Promise<void> {
+  return invoke("open_editor", { target });
+}
+
 export function addWorkspacePointer(path: string): Promise<void> {
   return invoke("add_workspace_pointer", { path });
 }
