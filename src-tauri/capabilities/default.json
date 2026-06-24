@@ -3,5 +3,10 @@
   "identifier": "default",
   "description": "Core permissions for every window (Peti, editor, settings).",
   "windows": ["peti:*", "peti", "editor:*", "settings"],
-  "permissions": ["core:default", "dialog:default", "notification:default"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-close",
+    "dialog:default",
+    "notification:default"
+  ]
 }
