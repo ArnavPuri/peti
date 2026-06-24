@@ -69,6 +69,9 @@ pub fn run() {
             commands::save_tasks,
             commands::save_workspace,
             commands::delete_workspace,
+            commands::scan_repos,
+            commands::export_workspace,
+            commands::import_workspace,
             commands::get_settings,
             commands::save_settings,
         ])

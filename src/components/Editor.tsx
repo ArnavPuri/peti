@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { open } from "@tauri-apps/plugin-dialog";
+import { open, save as saveDialog } from "@tauri-apps/plugin-dialog";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   deleteWorkspace,
+  exportWorkspace,
   getWorkspace,
+  importWorkspace,
   openPeti,
   saveWorkspace,
+  scanRepos,
   type PaneType,
 } from "../lib/ipc";
 
@@ -15,6 +18,13 @@ interface PaneForm {
   type: PaneType;
   command: string;
   resume: boolean;
+}
+
+interface ScanRow {
+  path: string;
+  name: string;
+  git: boolean;
+  checked: boolean;
 }
 
 const blankPane = (): PaneForm => ({
@@ -31,6 +41,7 @@ export default function Editor({ target }: { target: string }) {
   const [accent, setAccent] = useState("#5cd6ae");
   const [background, setBackground] = useState("");
   const [panes, setPanes] = useState<PaneForm[]>([blankPane()]);
+  const [scan, setScan] = useState<ScanRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -71,6 +82,63 @@ export default function Editor({ target }: { target: string }) {
       filters: [{ name: "Image", extensions: ["png", "jpg", "jpeg", "webp", "gif"] }],
     });
     if (typeof picked === "string") setBackground(picked);
+  };
+
+  const scanFolder = async () => {
+    const dir = await open({ directory: true, title: "Scan a folder for repos" });
+    if (typeof dir !== "string") return;
+    const repos = await scanRepos(dir);
+    setScan(repos.map((r) => ({ ...r, checked: r.git })));
+  };
+
+  const addScanned = () => {
+    const picks = (scan ?? []).filter((s) => s.checked);
+    setPanes((prev) => {
+      // drop the lone empty starter pane
+      const base = prev.length === 1 && !prev[0].path && !prev[0].label ? [] : prev;
+      return [
+        ...base,
+        ...picks.map((p) => ({
+          label: p.name,
+          path: p.path,
+          type: "claude" as PaneType,
+          command: "",
+          resume: false,
+        })),
+      ];
+    });
+    setScan(null);
+  };
+
+  const importFile = async () => {
+    const f = await open({
+      title: "Import a Peti TOML",
+      filters: [{ name: "TOML", extensions: ["toml"] }],
+    });
+    if (typeof f !== "string") return;
+    setBusy(true);
+    try {
+      const id = await importWorkspace(f);
+      await openPeti(id);
+      await getCurrentWindow().close();
+    } catch (e) {
+      setError(String(e));
+      setBusy(false);
+    }
+  };
+
+  const exportFile = async () => {
+    const dest = await saveDialog({
+      title: "Export Peti",
+      defaultPath: `${target}.toml`,
+      filters: [{ name: "TOML", extensions: ["toml"] }],
+    });
+    if (typeof dest !== "string") return;
+    try {
+      await exportWorkspace(target, dest);
+    } catch (e) {
+      setError(String(e));
+    }
   };
 
   const save = async () => {
@@ -117,6 +185,55 @@ export default function Editor({ target }: { target: string }) {
   return (
     <div className="editor">
       <h1>{isNew ? "New Peti" : `Edit · ${name || target}`}</h1>
+
+      <div className="editor-toolbar">
+        <button type="button" onClick={scanFolder}>
+          🔍 Scan folder…
+        </button>
+        {isNew ? (
+          <button type="button" onClick={importFile}>
+            ⬇ Import from file…
+          </button>
+        ) : (
+          <button type="button" onClick={exportFile}>
+            ⬆ Export…
+          </button>
+        )}
+      </div>
+
+      {scan && (
+        <div className="scan-panel">
+          <div className="scan-head">
+            <span>{scan.length} folders found — pick panes to add</span>
+            <div>
+              <button type="button" onClick={addScanned} disabled={!scan.some((s) => s.checked)}>
+                Add selected
+              </button>
+              <button type="button" onClick={() => setScan(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+          <div className="scan-list">
+            {scan.map((s, i) => (
+              <label key={s.path} className="scan-row">
+                <input
+                  type="checkbox"
+                  checked={s.checked}
+                  onChange={(e) =>
+                    setScan((prev) =>
+                      (prev ?? []).map((r, j) => (j === i ? { ...r, checked: e.target.checked } : r)),
+                    )
+                  }
+                />
+                <span className="scan-name">{s.name}</span>
+                {s.git && <span className="scan-git">git</span>}
+              </label>
+            ))}
+            {scan.length === 0 && <div className="note-empty">No subfolders here.</div>}
+          </div>
+        </div>
+      )}
 
       <label className="field">
         <span>Name</span>

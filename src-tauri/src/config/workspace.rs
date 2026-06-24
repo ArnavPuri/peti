@@ -386,6 +386,35 @@ pub fn save_workspace(input: WorkspaceInput) -> Result<String, String> {
     Ok(id)
 }
 
+/// Locate the source TOML for a workspace (global file, else a pointer path).
+fn source_path(id: &str) -> Option<PathBuf> {
+    let global = workspaces_dir().ok()?.join(format!("{id}.toml"));
+    if global.exists() {
+        return Some(global);
+    }
+    read_registry()
+        .into_iter()
+        .find(|e| e.id == id)
+        .map(|e| PathBuf::from(e.path))
+}
+
+/// Copy a workspace's TOML to a chosen path (verbatim — keeps comments).
+pub fn export_workspace(id: &str, dest: String) -> Result<(), String> {
+    let src = source_path(id).ok_or_else(|| format!("no TOML found for {id}"))?;
+    let content = fs::read_to_string(&src).map_err(|e| e.to_string())?;
+    fs::write(&dest, content).map_err(|e| e.to_string())
+}
+
+/// Import a workspace TOML from a chosen file into the global registry.
+pub fn import_workspace(src: String) -> Result<String, String> {
+    let content = fs::read_to_string(&src).map_err(|e| format!("cannot read {src}: {e}"))?;
+    let file = parse_workspace_file(&content)?; // validate + grab id
+    let id = sanitize_id(&file.workspace.id)?;
+    super::ensure_dirs()?;
+    fs::write(workspaces_dir()?.join(format!("{id}.toml")), content).map_err(|e| e.to_string())?;
+    Ok(id)
+}
+
 /// Delete a global workspace and its app-managed sidecars; drop any pointer.
 pub fn delete_workspace(id: &str) -> Result<(), String> {
     let dir = workspaces_dir()?;

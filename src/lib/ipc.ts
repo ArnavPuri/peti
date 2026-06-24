@@ -161,6 +161,24 @@ export function deleteWorkspace(id: string): Promise<void> {
   return invoke("delete_workspace", { id });
 }
 
+export interface RepoEntry {
+  path: string;
+  name: string;
+  git: boolean;
+}
+
+export function scanRepos(parent: string): Promise<RepoEntry[]> {
+  return invoke("scan_repos", { parent });
+}
+
+export function exportWorkspace(id: string, dest: string): Promise<void> {
+  return invoke("export_workspace", { id, dest });
+}
+
+export function importWorkspace(src: string): Promise<string> {
+  return invoke("import_workspace", { src });
+}
+
 // ---- settings -------------------------------------------------------------
 
 export interface AppSettings {

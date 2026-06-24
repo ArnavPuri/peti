@@ -85,6 +85,23 @@ pub fn delete_workspace(app: AppHandle, id: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn scan_repos(parent: String) -> Vec<crate::config::scan::RepoEntry> {
+    crate::config::scan::scan_repos(&parent)
+}
+
+#[tauri::command]
+pub fn export_workspace(id: String, dest: String) -> Result<(), String> {
+    ws::export_workspace(&id, dest)
+}
+
+#[tauri::command]
+pub fn import_workspace(app: AppHandle, src: String) -> Result<String, String> {
+    let id = ws::import_workspace(src)?;
+    crate::window::build_menu(&app)?;
+    Ok(id)
+}
+
+#[tauri::command]
 pub fn get_settings() -> AppSettings {
     settings::get_settings()
 }
