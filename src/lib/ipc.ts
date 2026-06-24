@@ -62,33 +62,34 @@ export interface PaneDef {
   command: string | null;
 }
 
+// Floating-card geometry: fractions of the canvas (0–1); z is stacking order.
+export interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  z: number;
+}
+
 export interface Workspace {
   id: string;
   name: string;
-  background: string | null;
+  background: string | null; // absolute path, resolved backend-side
   accent: string | null;
   panes: PaneDef[];
-  sizes: number[]; // fractions, one per pane
-}
-
-export interface WorkspaceSummary {
-  id: string;
-  name: string;
-  accent: string | null;
-  background: string | null;
-  pane_count: number;
-}
-
-export function listWorkspaces(): Promise<WorkspaceSummary[]> {
-  return invoke("list_workspaces");
+  rects: Rect[]; // aligned with panes by index
 }
 
 export function getWorkspace(id: string): Promise<Workspace> {
   return invoke("get_workspace", { id });
 }
 
-export function saveLayout(id: string, sizes: number[]): Promise<void> {
-  return invoke("save_layout", { id, sizes });
+export function saveLayout(id: string, panes: Rect[]): Promise<void> {
+  return invoke("save_layout", { id, panes });
+}
+
+export function openPeti(id: string): Promise<void> {
+  return invoke("open_peti", { id });
 }
 
 export function addWorkspacePointer(path: string): Promise<void> {

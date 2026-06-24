@@ -2,8 +2,8 @@
 //!
 //! Two sources, one list path: global `workspaces/*.toml` plus in-repo
 //! `.peti/workspace.toml` files registered as pointers in `registry.json`.
-//! Pane sizes live in app-managed `<id>.layout.json`; the TOML is never
-//! machine-written.
+//! Floating-card geometry lives in app-managed `<id>.layout.json`; the TOML is
+//! never machine-written.
 
 use std::collections::HashSet;
 use std::fs;
@@ -11,7 +11,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use super::{registry_path, workspaces_dir};
+use super::{config_root, expand_tilde, registry_path, workspaces_dir};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "lowercase")]
@@ -19,6 +19,15 @@ pub enum PaneType {
     #[default]
     Claude,
     Shell,
+}
+
+/// Authored starting geometry on a `[[pane]]` (fractions of the canvas).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RectToml {
+    pub x: f64,
+    pub y: f64,
+    pub w: f64,
+    pub h: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,6 +38,8 @@ pub struct PaneDef {
     pub pane_type: PaneType,
     #[serde(default)]
     pub command: Option<String>,
+    #[serde(default)]
+    pub rect: Option<RectToml>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -41,31 +52,33 @@ pub struct WorkspaceMeta {
     pub accent: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
-struct LayoutToml {
-    #[serde(default)]
-    sizes: Vec<f64>,
-}
-
-/// Mirrors the on-disk TOML: `[workspace]`, `[[pane]]`, optional `[layout]`.
+/// Mirrors the on-disk TOML: `[workspace]` + `[[pane]]`.
 #[derive(Debug, Clone, Deserialize)]
 struct WorkspaceFile {
     workspace: WorkspaceMeta,
     #[serde(default)]
     pane: Vec<PaneDef>,
-    #[serde(default)]
-    layout: Option<LayoutToml>,
 }
 
-/// Fully resolved workspace handed to the frontend.
+/// Live floating-card geometry (fractions of the canvas; `z` is stacking order).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Rect {
+    pub x: f64,
+    pub y: f64,
+    pub w: f64,
+    pub h: f64,
+    pub z: i32,
+}
+
+/// Fully resolved workspace handed to a Peti window.
 #[derive(Debug, Clone, Serialize)]
 pub struct Workspace {
     pub id: String,
     pub name: String,
-    pub background: Option<String>,
+    pub background: Option<String>, // resolved to an absolute path
     pub accent: Option<String>,
     pub panes: Vec<PaneDef>,
-    pub sizes: Vec<f64>,
+    pub rects: Vec<Rect>, // aligned with `panes` by index
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -85,7 +98,7 @@ struct PointerEntry {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct LayoutJson {
-    sizes: Vec<f64>,
+    panes: Vec<Rect>,
 }
 
 // ---- pure helpers (unit-tested) -------------------------------------------
@@ -94,39 +107,62 @@ fn parse_workspace_file(contents: &str) -> Result<WorkspaceFile, String> {
     toml::from_str(contents).map_err(|e| e.to_string())
 }
 
-fn equal_sizes(n: usize) -> Vec<f64> {
-    if n == 0 {
-        return vec![];
+/// Stagger panes that have no authored/live geometry so they don't stack
+/// exactly on top of each other.
+fn cascade_rect(i: usize) -> Rect {
+    let k = i as f64;
+    let step = 0.045;
+    Rect {
+        x: (0.05 + k * step).min(0.4),
+        y: (0.06 + k * step).min(0.4),
+        w: 0.46,
+        h: 0.52,
+        z: (i + 1) as i32,
     }
-    vec![1.0 / n as f64; n]
 }
 
-/// Read order: live JSON sizes (if pane count matches) → authored TOML sizes
-/// (if pane count matches) → equal split.
-fn resolve_sizes(file: &WorkspaceFile, live: Option<Vec<f64>>) -> Vec<f64> {
+/// Resolution order: live JSON (if it covers every pane) → authored `rect` →
+/// auto-cascade.
+fn resolve_rects(file: &WorkspaceFile, live: Option<Vec<Rect>>) -> Vec<Rect> {
     let n = file.pane.len();
-    if let Some(s) = live {
-        if s.len() == n && n > 0 {
-            return s;
+    if let Some(r) = live {
+        if r.len() == n && n > 0 {
+            return r;
         }
     }
-    if let Some(layout) = &file.layout {
-        if layout.sizes.len() == n && n > 0 {
-            return layout.sizes.clone();
-        }
-    }
-    equal_sizes(n)
+    file.pane
+        .iter()
+        .enumerate()
+        .map(|(i, p)| match &p.rect {
+            Some(rt) => Rect {
+                x: rt.x,
+                y: rt.y,
+                w: rt.w,
+                h: rt.h,
+                z: (i + 1) as i32,
+            },
+            None => cascade_rect(i),
+        })
+        .collect()
 }
 
-fn into_workspace(file: WorkspaceFile, sizes: Vec<f64>) -> Workspace {
-    Workspace {
-        id: file.workspace.id,
-        name: file.workspace.name,
-        background: file.workspace.background,
-        accent: file.workspace.accent,
-        panes: file.pane,
-        sizes,
+/// Resolve a workspace's `background` (relative-to-config, `~`, or absolute) to
+/// an absolute path string.
+fn resolve_background(raw: Option<&str>) -> Option<String> {
+    let raw = raw?;
+    if raw.is_empty() {
+        return None;
     }
+    let expanded = expand_tilde(raw);
+    let path = if expanded.is_absolute() {
+        expanded
+    } else {
+        match config_root() {
+            Ok(root) => root.join(expanded),
+            Err(_) => expanded,
+        }
+    };
+    Some(path.to_string_lossy().into_owned())
 }
 
 // ---- filesystem-facing ----------------------------------------------------
@@ -167,6 +203,7 @@ fn all_workspace_files() -> Vec<WorkspaceFile> {
         }
     }
 
+    out.sort_by(|a, b| a.workspace.name.to_lowercase().cmp(&b.workspace.name.to_lowercase()));
     out
 }
 
@@ -174,10 +211,10 @@ fn layout_path(id: &str) -> Result<PathBuf, String> {
     Ok(workspaces_dir()?.join(format!("{id}.layout.json")))
 }
 
-fn read_layout(id: &str) -> Option<Vec<f64>> {
+fn read_layout(id: &str) -> Option<Vec<Rect>> {
     let contents = fs::read_to_string(layout_path(id).ok()?).ok()?;
     let parsed: LayoutJson = serde_json::from_str(&contents).ok()?;
-    Some(parsed.sizes)
+    Some(parsed.panes)
 }
 
 fn read_registry() -> Vec<PointerEntry> {
@@ -208,13 +245,23 @@ pub fn get_workspace(id: &str) -> Result<Workspace, String> {
         .into_iter()
         .find(|f| f.workspace.id == id)
         .ok_or_else(|| format!("workspace not found: {id}"))?;
-    let sizes = resolve_sizes(&file, read_layout(id));
-    Ok(into_workspace(file, sizes))
+
+    let rects = resolve_rects(&file, read_layout(id));
+    let background = resolve_background(file.workspace.background.as_deref());
+
+    Ok(Workspace {
+        id: file.workspace.id,
+        name: file.workspace.name,
+        background,
+        accent: file.workspace.accent,
+        panes: file.pane,
+        rects,
+    })
 }
 
-pub fn save_layout(id: &str, sizes: Vec<f64>) -> Result<(), String> {
+pub fn save_layout(id: &str, panes: Vec<Rect>) -> Result<(), String> {
     super::ensure_dirs()?;
-    let json = serde_json::to_string_pretty(&LayoutJson { sizes }).map_err(|e| e.to_string())?;
+    let json = serde_json::to_string_pretty(&LayoutJson { panes }).map_err(|e| e.to_string())?;
     fs::write(layout_path(id)?, json).map_err(|e| e.to_string())
 }
 
@@ -251,15 +298,13 @@ accent = "#5CD6AE"
 label = "api"
 path = "~/dev/api"
 type = "claude"
+rect = { x = 0.1, y = 0.2, w = 0.4, h = 0.5 }
 
 [[pane]]
 label = "web"
 path = "~/dev/web"
 type = "shell"
 command = "zsh"
-
-[layout]
-sizes = [0.6, 0.4]
 "##;
 
     #[test]
@@ -279,37 +324,48 @@ sizes = [0.6, 0.4]
         let f = parse_workspace_file(toml).unwrap();
         assert_eq!(f.pane[0].pane_type, PaneType::Claude);
         assert!(f.pane[0].command.is_none());
+        assert!(f.pane[0].rect.is_none());
+    }
+
+    #[test]
+    fn authored_rect_used_with_index_z() {
+        let f = parse_workspace_file(SAMPLE).unwrap();
+        let rects = resolve_rects(&f, None);
+        assert_eq!(rects[0], Rect { x: 0.1, y: 0.2, w: 0.4, h: 0.5, z: 1 });
+        // pane 1 has no authored rect -> cascade, with z = 2
+        assert_eq!(rects[1].z, 2);
     }
 
     #[test]
     fn live_layout_wins_when_pane_count_matches() {
         let f = parse_workspace_file(SAMPLE).unwrap();
-        assert_eq!(resolve_sizes(&f, Some(vec![0.5, 0.5])), vec![0.5, 0.5]);
-    }
-
-    #[test]
-    fn falls_back_to_authored_sizes() {
-        let f = parse_workspace_file(SAMPLE).unwrap();
-        assert_eq!(resolve_sizes(&f, None), vec![0.6, 0.4]);
+        let live = vec![
+            Rect { x: 0.0, y: 0.0, w: 0.5, h: 0.5, z: 5 },
+            Rect { x: 0.5, y: 0.0, w: 0.5, h: 0.5, z: 6 },
+        ];
+        assert_eq!(resolve_rects(&f, Some(live.clone())), live);
     }
 
     #[test]
     fn mismatched_live_layout_ignored() {
         let f = parse_workspace_file(SAMPLE).unwrap();
-        // 3 live sizes but 2 panes -> ignore live, use authored
-        assert_eq!(resolve_sizes(&f, Some(vec![0.3, 0.3, 0.4])), vec![0.6, 0.4]);
+        // 1 live rect but 2 panes -> ignore live, use authored/cascade
+        let rects = resolve_rects(&f, Some(vec![Rect { x: 0.0, y: 0.0, w: 1.0, h: 1.0, z: 1 }]));
+        assert_eq!(rects.len(), 2);
+        assert_eq!(rects[0].x, 0.1); // authored
     }
 
     #[test]
-    fn equal_split_when_no_layout() {
+    fn cascade_staggers_and_orders_z() {
         let toml = "[workspace]\nid='x'\nname='X'\n\
                     [[pane]]\nlabel='a'\npath='/a'\n\
-                    [[pane]]\nlabel='b'\npath='/b'\n\
-                    [[pane]]\nlabel='c'\npath='/c'\n";
+                    [[pane]]\nlabel='b'\npath='/b'\n";
         let f = parse_workspace_file(toml).unwrap();
-        let sizes = resolve_sizes(&f, None);
-        assert_eq!(sizes.len(), 3);
-        assert!((sizes.iter().sum::<f64>() - 1.0).abs() < 1e-9);
+        let rects = resolve_rects(&f, None);
+        assert_eq!(rects.len(), 2);
+        assert!(rects[1].x > rects[0].x);
+        assert_eq!(rects[0].z, 1);
+        assert_eq!(rects[1].z, 2);
     }
 
     #[test]

@@ -10,16 +10,13 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [
-      {
-        "label": "main",
-        "title": "Peti",
-        "width": 1000,
-        "height": 700
-      }
-    ],
+    "windows": [],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$HOME/**"]
+      }
     }
   },
   "bundle": {

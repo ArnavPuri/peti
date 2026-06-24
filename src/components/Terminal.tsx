@@ -17,10 +17,9 @@ interface Props {
   cwd: string;
   command: string;
   args: string[];
-  label: string;
 }
 
-export default function Terminal({ sessionId, cwd, command, args, label }: Props) {
+export default function Terminal({ sessionId, cwd, command, args }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -104,10 +103,5 @@ export default function Terminal({ sessionId, cwd, command, args, label }: Props
     };
   }, [sessionId, cwd, command, args]);
 
-  return (
-    <div className="pane">
-      <div className="pane-header">{label}</div>
-      <div className="pane-terminal" ref={hostRef} />
-    </div>
-  );
+  return <div className="term-host" ref={hostRef} />;
 }

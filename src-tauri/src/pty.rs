@@ -137,11 +137,20 @@ impl PtyManager {
         Ok(())
     }
 
-    pub fn kill_all(&self) {
-        let drained: Vec<Session> = self.sessions.lock().unwrap().drain().map(|(_, s)| s).collect();
-        for mut session in drained {
-            let _ = session.child.kill();
-            let _ = session.child.wait();
+    /// Kill every session whose id starts with `prefix`. Used on window close
+    /// to tear down exactly one Peti's children (SessionId = "<petiId>::<idx>").
+    pub fn kill_by_prefix(&self, prefix: &str) {
+        let mut sessions = self.sessions.lock().unwrap();
+        let keys: Vec<String> = sessions
+            .keys()
+            .filter(|k| k.starts_with(prefix))
+            .cloned()
+            .collect();
+        for key in keys {
+            if let Some(mut session) = sessions.remove(&key) {
+                let _ = session.child.kill();
+                let _ = session.child.wait();
+            }
         }
     }
 }

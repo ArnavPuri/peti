@@ -31,13 +31,18 @@ pub fn get_workspace(id: String) -> Result<ws::Workspace, String> {
 }
 
 #[tauri::command]
-pub fn save_layout(id: String, sizes: Vec<f64>) -> Result<(), String> {
-    ws::save_layout(&id, sizes)
+pub fn save_layout(id: String, panes: Vec<ws::Rect>) -> Result<(), String> {
+    ws::save_layout(&id, panes)
 }
 
 #[tauri::command]
 pub fn add_workspace_pointer(path: String) -> Result<(), String> {
     ws::add_workspace_pointer(path)
+}
+
+#[tauri::command]
+pub fn open_peti(app: AppHandle, id: String) -> Result<(), String> {
+    crate::window::open_peti_window(&app, &id)
 }
 
 #[tauri::command]
