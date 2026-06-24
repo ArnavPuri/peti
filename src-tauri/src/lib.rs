@@ -18,9 +18,35 @@ fn peti_url_id(url: &str) -> Option<String> {
         .filter(|s| !s.is_empty())
 }
 
+/// Parse a `--peti <id>` / `--peti=<id>` CLI argument.
+fn peti_cli_id(args: &[String]) -> Option<String> {
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        if let Some(id) = a.strip_prefix("--peti=") {
+            if !id.is_empty() {
+                return Some(id.to_string());
+            }
+        } else if a == "--peti" {
+            if let Some(id) = it.next() {
+                if !id.is_empty() {
+                    return Some(id.clone());
+                }
+            }
+        }
+    }
+    None
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        // Single-instance must be registered first: a launcher that execs the
+        // binary with --peti forwards its argv here instead of duplicating.
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            if let Some(id) = peti_cli_id(&argv) {
+                let _ = window::open_peti_window(app, &id);
+            }
+        }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_deep_link::init())
@@ -40,8 +66,10 @@ pub fn run() {
                 }
             });
 
-            // Was the app cold-launched by a peti:// URL?
-            let launch_ids: Vec<String> = app
+            // Was the app cold-launched targeting a specific Peti? Either via a
+            // peti:// URL (installed builds) or a --peti CLI arg (the launcher's
+            // dev fallback).
+            let mut launch_ids: Vec<String> = app
                 .deep_link()
                 .get_current()
                 .ok()
@@ -50,6 +78,9 @@ pub fn run() {
                 .iter()
                 .filter_map(|u| peti_url_id(u.as_str()))
                 .collect();
+            if let Some(id) = peti_cli_id(&std::env::args().collect::<Vec<_>>()) {
+                launch_ids.push(id);
+            }
 
             // Menubar/tray indicator — updated by the status poll with the
             // count of Claudes awaiting input across all Petis.

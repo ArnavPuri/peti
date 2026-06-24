@@ -152,9 +152,17 @@ pub fn create_launcher(id: &str, dest_dir: &str) -> Result<String, String> {
     fs::create_dir_all(&macos).map_err(|e| e.to_string())?;
     fs::create_dir_all(&resources).map_err(|e| e.to_string())?;
 
-    // launch script
+    // launch script: prefer the registered peti:// scheme (installed builds),
+    // otherwise exec the current Peti binary with --peti (works in dev too,
+    // routed via the single-instance plugin).
+    let exe = std::env::current_exe()
+        .map(|p| p.to_string_lossy().into_owned())
+        .unwrap_or_default();
     let launch = macos.join("launch");
-    fs::write(&launch, format!("#!/bin/sh\nopen \"peti://open/{id}\"\n")).map_err(|e| e.to_string())?;
+    let script = format!(
+        "#!/bin/sh\nopen \"peti://open/{id}\" 2>/dev/null && exit 0\nexec \"{exe}\" --peti \"{id}\"\n"
+    );
+    fs::write(&launch, script).map_err(|e| e.to_string())?;
     fs::set_permissions(&launch, fs::Permissions::from_mode(0o755)).map_err(|e| e.to_string())?;
 
     // Info.plist
