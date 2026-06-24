@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import Terminal from "./Terminal";
 import type { Rect } from "../lib/ipc";
 
@@ -11,7 +11,7 @@ interface Props {
   cwd: string;
   command: string;
   args: string[];
-  onChange: (patch: Partial<Rect>) => void;
+  onCommit: (rect: Rect) => void;
   onFocus: () => void;
   onClose: () => void;
 }
@@ -19,31 +19,61 @@ interface Props {
 const MIN_W = 0.15;
 const MIN_H = 0.15;
 
-// A draggable / resizable translucent terminal card. Drag from the title bar,
-// resize from the bottom-right corner; both report geometry as canvas fractions.
+const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+
+// A draggable / resizable translucent terminal card.
+//
+// Smoothness: the gesture runs *imperatively* — pointermove mutates the card's
+// transform/size directly on the DOM node (no React re-render per frame) and we
+// commit to React state once, on release. Position uses GPU-composited
+// translate3d (not left/top), and blur is dropped mid-gesture (the `.gesturing`
+// class) so the backdrop isn't re-sampled every frame.
 export default function FloatingPane(props: Props) {
-  const { rect, canvas, accent, label, onChange, onFocus, onClose } = props;
+  const { rect, canvas, accent, label, onCommit, onFocus, onClose } = props;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [gesturing, setGesturing] = useState(false);
+
+  // Live geometry during a gesture. Re-synced from props on every render (which
+  // never happens mid-gesture, since moves are imperative).
+  const live = useRef<Rect>(rect);
+  live.current = rect;
+
   const drag = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
   const resize = useRef<{ px: number; py: number; ow: number; oh: number } | null>(null);
+
+  const applyTransform = () => {
+    const el = cardRef.current;
+    if (!el) return;
+    const r = live.current;
+    el.style.transform = `translate3d(${r.x * canvas.w}px, ${r.y * canvas.h}px, 0)`;
+    el.style.width = `${r.w * canvas.w}px`;
+    el.style.height = `${r.h * canvas.h}px`;
+  };
 
   const startDrag = (e: ReactPointerEvent) => {
     e.preventDefault();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     drag.current = { px: e.clientX, py: e.clientY, ox: rect.x, oy: rect.y };
     onFocus();
+    setGesturing(true);
   };
   const onDragMove = (e: ReactPointerEvent) => {
     if (!drag.current || canvas.w === 0) return;
     const dx = (e.clientX - drag.current.px) / canvas.w;
     const dy = (e.clientY - drag.current.py) / canvas.h;
-    onChange({
-      x: Math.min(Math.max(drag.current.ox + dx, 0), 1 - rect.w),
-      y: Math.min(Math.max(drag.current.oy + dy, 0), 1 - rect.h),
-    });
+    live.current = {
+      ...live.current,
+      x: clamp(drag.current.ox + dx, 0, 1 - live.current.w),
+      y: clamp(drag.current.oy + dy, 0, 1 - live.current.h),
+    };
+    applyTransform();
   };
   const endDrag = (e: ReactPointerEvent) => {
+    if (!drag.current) return;
     drag.current = null;
     (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+    setGesturing(false);
+    onCommit(live.current);
   };
 
   const startResize = (e: ReactPointerEvent) => {
@@ -52,32 +82,42 @@ export default function FloatingPane(props: Props) {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     resize.current = { px: e.clientX, py: e.clientY, ow: rect.w, oh: rect.h };
     onFocus();
+    setGesturing(true);
   };
   const onResizeMove = (e: ReactPointerEvent) => {
     if (!resize.current || canvas.w === 0) return;
     const dw = (e.clientX - resize.current.px) / canvas.w;
     const dh = (e.clientY - resize.current.py) / canvas.h;
-    onChange({
-      w: Math.min(Math.max(resize.current.ow + dw, MIN_W), 1 - rect.x),
-      h: Math.min(Math.max(resize.current.oh + dh, MIN_H), 1 - rect.y),
-    });
+    live.current = {
+      ...live.current,
+      w: clamp(resize.current.ow + dw, MIN_W, 1 - live.current.x),
+      h: clamp(resize.current.oh + dh, MIN_H, 1 - live.current.y),
+    };
+    applyTransform();
   };
   const endResize = (e: ReactPointerEvent) => {
+    if (!resize.current) return;
     resize.current = null;
     (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+    setGesturing(false);
+    onCommit(live.current);
   };
 
   const style: CSSProperties = {
-    left: `${rect.x * 100}%`,
-    top: `${rect.y * 100}%`,
-    width: `${rect.w * 100}%`,
-    height: `${rect.h * 100}%`,
+    transform: `translate3d(${rect.x * canvas.w}px, ${rect.y * canvas.h}px, 0)`,
+    width: `${rect.w * canvas.w}px`,
+    height: `${rect.h * canvas.h}px`,
     zIndex: rect.z,
     borderColor: `${accent}55`,
   };
 
   return (
-    <div className="pane-card" style={style} onPointerDown={onFocus}>
+    <div
+      ref={cardRef}
+      className={`pane-card${gesturing ? " gesturing" : ""}`}
+      style={style}
+      onPointerDown={onFocus}
+    >
       <div
         className="pane-card-title"
         onPointerDown={startDrag}

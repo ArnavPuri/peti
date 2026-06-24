@@ -48,10 +48,23 @@ export default function Terminal({ sessionId, cwd, command, args }: Props) {
       void writePane(sessionId, encoder.encode(data));
     });
 
-    // container resize (window OR panel drag) -> fit -> pty resize (SIGWINCH)
+    // container resize (window OR card drag-resize) -> fit -> pty resize.
+    // rAF-coalesced and guarded so a live resize doesn't spam fit/SIGWINCH; we
+    // only message the PTY when the grid (cols/rows) actually changes.
+    let raf = 0;
+    let lastCols = -1;
+    let lastRows = -1;
     const handleResize = () => {
-      fit.fit();
-      void resizePane(sessionId, term.cols, term.rows);
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        fit.fit();
+        if (term.cols !== lastCols || term.rows !== lastRows) {
+          lastCols = term.cols;
+          lastRows = term.rows;
+          void resizePane(sessionId, term.cols, term.rows);
+        }
+      });
     };
     const observer = new ResizeObserver(handleResize);
     observer.observe(host);
@@ -95,6 +108,7 @@ export default function Terminal({ sessionId, cwd, command, args }: Props) {
 
     return () => {
       disposed = true;
+      if (raf) cancelAnimationFrame(raf);
       observer.disconnect();
       unlisteners.forEach((u) => u());
       void killPane(sessionId);

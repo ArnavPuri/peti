@@ -60,6 +60,8 @@ body {
 
 .pane-card {
   position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -72,6 +74,16 @@ body {
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   user-select: none;
+  will-change: transform;
+}
+
+/* While dragging/resizing: drop the (expensive) backdrop blur so the gesture
+   stays at 60fps; fall back to a near-opaque panel. */
+.pane-card.gesturing {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(13, 15, 18, 0.92);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
 }
 
 .pane-card-title {

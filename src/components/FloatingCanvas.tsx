@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import FloatingPane from "./FloatingPane";
 import { saveLayout, type Rect, type Workspace } from "../lib/ipc";
 import { resolveCommand } from "../lib/command";
@@ -18,7 +18,8 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
   const [closed, setClosed] = useState<Set<number>>(() => new Set());
 
   // Measure the canvas in px so drag/resize can map pointer deltas to fractions.
-  useEffect(() => {
+  // useLayoutEffect so the first paint already has real px (no zero-size flash).
+  useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const measure = () => setSize({ w: el.clientWidth, h: el.clientHeight });
@@ -33,9 +34,9 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
     [workspace.id],
   );
 
-  const updateRect = (i: number, patch: Partial<Rect>) => {
+  const commitRect = (i: number, rect: Rect) => {
     setRects((prev) => {
-      const next = prev.map((r, j) => (j === i ? { ...r, ...patch } : r));
+      const next = prev.map((r, j) => (j === i ? rect : r));
       persist(next);
       return next;
     });
@@ -70,7 +71,7 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
             cwd={pane.path}
             command={command}
             args={args}
-            onChange={(patch) => updateRect(i, patch)}
+            onCommit={(r) => commitRect(i, r)}
             onFocus={() => bringToFront(i)}
             onClose={() => close(i)}
           />
