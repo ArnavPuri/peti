@@ -18,7 +18,7 @@ use std::time::Duration;
 
 use directories::BaseDirs;
 use serde::Serialize;
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -139,10 +139,14 @@ impl StatusManager {
         thread::spawn(move || loop {
             thread::sleep(Duration::from_secs(1));
             let mut changes: Vec<StatusPayload> = Vec::new();
+            let mut awaiting = 0usize;
             {
                 let mut map = watched.lock().unwrap();
                 for (session_id, watch) in map.iter_mut() {
                     let state = derive_state(&watch.dir);
+                    if state == State::Awaiting {
+                        awaiting += 1;
+                    }
                     if watch.last != Some(state) {
                         watch.last = Some(state);
                         changes.push(StatusPayload {
@@ -154,6 +158,21 @@ impl StatusManager {
             }
             for change in changes {
                 let _ = app.emit("session://status", change);
+            }
+
+            // Reflect the global "needs you" count in the menubar/tray.
+            if let Some(tray) = app.tray_by_id("peti") {
+                let _ = tray.set_title(if awaiting > 0 {
+                    Some(awaiting.to_string())
+                } else {
+                    None
+                });
+                let tip = if awaiting > 0 {
+                    format!("Peti — {awaiting} awaiting your input")
+                } else {
+                    "Peti".to_string()
+                };
+                let _ = tray.set_tooltip(Some(tip.as_str()));
             }
         });
     }

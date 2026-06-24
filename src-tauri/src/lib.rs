@@ -20,6 +20,16 @@ pub fn run() {
             let _ = config::ensure_dirs();
             let handle = app.handle();
 
+            // Menubar/tray indicator — updated by the status poll with the
+            // count of Claudes awaiting input across all Petis.
+            if let Some(icon) = app.default_window_icon().cloned() {
+                let _ = tauri::tray::TrayIconBuilder::with_id("peti")
+                    .icon(icon)
+                    .icon_as_template(true)
+                    .tooltip("Peti")
+                    .build(app);
+            }
+
             app.state::<StatusManager>().start(handle.clone());
 
             let _ = window::build_menu(handle);
