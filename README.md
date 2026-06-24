@@ -16,12 +16,20 @@ See [`PRD.md`](./PRD.md) for the full product spec and phased plan.
 | **0** | Terminal spike — PTY ↔ xterm round-trip running real `claude` | **done** |
 | **1** | Self-contained Peti shell — one window per Peti, free-floating Claude cards over a background | **done** |
 | **2** | Core loop — task note + prompt bar + send-to-Claude + resume | **done** |
-| **3** | Authoring & ship → v1 — in-app editor, settings, packaged builds | **in progress** |
+| **3** | Authoring & ship → v1 — in-app editor, settings, packaged builds | **done** (macOS) |
 
 Each **Peti** opens as its own window (chosen from a native menu) — no in-app switcher, no launcher.
 Inside, its repos run as draggable, resizable, translucent terminal cards over a recognisable
 background, with a floating task note and a prompt bar. See [`PRD.md`](./PRD.md) for the full
 architecture and phased plan.
+
+**Beyond v1 (shipped):** live session status (per-card working/awaiting badges) with desktop
+notifications + chime · in-Peti background switcher with gradient presets · light/dark/system themes ·
+prompt snippets · terminal copy/paste/find/clear/font-size · git branch + dirty status per card ·
+folder scan + import/export for fast Peti creation.
+
+**Remaining for public release:** CI for the Linux AppImage/`.deb`, README screenshots, and a
+name-availability check.
 
 ## Stack
 

@@ -315,10 +315,12 @@ Acceptance:
 **Gate:** v1 done — daily use. **Effort:** ~1–1.5 weeks.
 
 ### Phase 4+ — Fast-follow (P1/P2) → public release
-JSONL status + desktop notifications · `TODO.md` sync · prompt templates/snippets · plain shell
-cards · terminal search/copy/clear/font · git branch + dirty status per card · theme/background
-presets + light/dark · completion chime · **ambient music player (the "Focus" window — P2)** ·
-Peti templates + auto-detect · export/import configs. Then polish README/screenshots and announce.
+**Shipped:** JSONL session status + desktop notifications + completion chime · prompt
+templates/snippets · plain shell cards · terminal search/copy/clear/font · git branch + dirty status
+per card · background presets + in-Peti switcher · theme presets + light/dark/system · Peti
+auto-detect (folder scan) · export/import configs.
+**Remaining:** `TODO.md` / `WORKSPACE.md` sync · **ambient music player (the "Focus" window — P2)** ·
+CI for the Linux AppImage/`.deb` · README/screenshots · name-availability check. Then announce.
 
 ---
 
