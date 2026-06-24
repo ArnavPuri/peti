@@ -66,6 +66,11 @@ pub fn open_editor(app: AppHandle, target: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn create_launcher(id: String, dest_dir: String) -> Result<String, String> {
+    crate::launcher::create_launcher(&id, &dest_dir)
+}
+
+#[tauri::command]
 pub fn list_tasks(id: String) -> Vec<Task> {
     tasks::list_tasks(&id)
 }

@@ -1004,6 +1004,12 @@ body {
   font-size: 12px;
 }
 
+.editor-notice {
+  color: var(--accent);
+  font-size: 12px;
+  word-break: break-all;
+}
+
 .editor-actions {
   margin-top: auto;
   padding-top: 8px;

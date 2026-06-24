@@ -133,6 +133,11 @@ export function openEditor(target: string): Promise<void> {
   return invoke("open_editor", { target });
 }
 
+// Generates a <Name>.app launcher for the Peti in destDir; returns its path.
+export function createLauncher(id: string, destDir: string): Promise<string> {
+  return invoke("create_launcher", { id, destDir });
+}
+
 export function addWorkspacePointer(path: string): Promise<void> {
   return invoke("add_workspace_pointer", { path });
 }

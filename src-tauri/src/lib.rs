@@ -1,6 +1,7 @@
 mod commands;
 mod config;
 mod git;
+mod launcher;
 mod pty;
 mod status;
 mod window;
@@ -8,17 +9,47 @@ mod window;
 use pty::PtyManager;
 use status::StatusManager;
 use tauri::Manager;
+use tauri_plugin_deep_link::DeepLinkExt;
+
+/// Parse `peti://open/<id>` -> the workspace id.
+fn peti_url_id(url: &str) -> Option<String> {
+    url.strip_prefix("peti://open/")
+        .map(|s| s.trim_end_matches('/').to_string())
+        .filter(|s| !s.is_empty())
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_deep_link::init())
         .manage(PtyManager::default())
         .manage(StatusManager::default())
         .setup(|app| {
             let _ = config::ensure_dirs();
             let handle = app.handle();
+
+            // Route peti://open/<id> to the right window (app already running).
+            let dl_handle = handle.clone();
+            app.deep_link().on_open_url(move |event| {
+                for url in event.urls() {
+                    if let Some(id) = peti_url_id(url.as_str()) {
+                        let _ = window::open_peti_window(&dl_handle, &id);
+                    }
+                }
+            });
+
+            // Was the app cold-launched by a peti:// URL?
+            let launch_ids: Vec<String> = app
+                .deep_link()
+                .get_current()
+                .ok()
+                .flatten()
+                .unwrap_or_default()
+                .iter()
+                .filter_map(|u| peti_url_id(u.as_str()))
+                .collect();
 
             // Menubar/tray indicator — updated by the status poll with the
             // count of Claudes awaiting input across all Petis.
@@ -46,21 +77,28 @@ pub fn run() {
                 }
             });
 
-            // Open the first Peti on launch; if there are none, show a bare
-            // window with the "add a Peti" hint (no ?peti= param).
-            match config::workspace::list_workspaces().first() {
-                Some(first) => {
-                    let _ = window::open_peti_window(handle, &first.id);
+            if !launch_ids.is_empty() {
+                // Launched via a peti:// launcher — open exactly those.
+                for id in &launch_ids {
+                    let _ = window::open_peti_window(handle, id);
                 }
-                None => {
-                    let _ = tauri::WebviewWindowBuilder::new(
-                        handle,
-                        "peti",
-                        tauri::WebviewUrl::App("index.html".into()),
-                    )
-                    .title("Peti")
-                    .inner_size(820.0, 600.0)
-                    .build();
+            } else {
+                // Open the first Peti on launch; if there are none, show a bare
+                // window with the "add a Peti" hint (no ?peti= param).
+                match config::workspace::list_workspaces().first() {
+                    Some(first) => {
+                        let _ = window::open_peti_window(handle, &first.id);
+                    }
+                    None => {
+                        let _ = tauri::WebviewWindowBuilder::new(
+                            handle,
+                            "peti",
+                            tauri::WebviewUrl::App("index.html".into()),
+                        )
+                        .title("Peti")
+                        .inner_size(820.0, 600.0)
+                        .build();
+                    }
                 }
             }
             Ok(())
@@ -78,6 +116,7 @@ pub fn run() {
             commands::add_workspace_pointer,
             commands::open_peti,
             commands::open_editor,
+            commands::create_launcher,
             commands::list_tasks,
             commands::save_tasks,
             commands::save_workspace,

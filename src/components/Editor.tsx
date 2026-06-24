@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { open, save as saveDialog } from "@tauri-apps/plugin-dialog";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
+  createLauncher,
   deleteWorkspace,
   exportWorkspace,
   getWorkspace,
@@ -43,6 +44,7 @@ export default function Editor({ target }: { target: string }) {
   const [panes, setPanes] = useState<PaneForm[]>([blankPane()]);
   const [scan, setScan] = useState<ScanRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -141,6 +143,19 @@ export default function Editor({ target }: { target: string }) {
     }
   };
 
+  const makeLauncher = async () => {
+    const dir = await open({ directory: true, title: "Where to save the launcher app" });
+    if (typeof dir !== "string") return;
+    setError(null);
+    setNotice(null);
+    try {
+      const path = await createLauncher(target, dir);
+      setNotice(`Launcher created at ${path}. First time, macOS may ask to allow it.`);
+    } catch (e) {
+      setError(String(e));
+    }
+  };
+
   const save = async () => {
     setError(null);
     if (!name.trim()) return setError("Give the Peti a name.");
@@ -195,9 +210,14 @@ export default function Editor({ target }: { target: string }) {
             ⬇ Import from file…
           </button>
         ) : (
-          <button type="button" onClick={exportFile}>
-            ⬆ Export…
-          </button>
+          <>
+            <button type="button" onClick={exportFile}>
+              ⬆ Export…
+            </button>
+            <button type="button" onClick={makeLauncher}>
+              🚀 Create launcher…
+            </button>
+          </>
         )}
       </div>
 
@@ -324,6 +344,7 @@ export default function Editor({ target }: { target: string }) {
       </div>
 
       {error && <div className="editor-error">{error}</div>}
+      {notice && <div className="editor-notice">{notice}</div>}
 
       <div className="editor-actions">
         <button type="button" className="btn-danger" onClick={remove} disabled={busy}>
