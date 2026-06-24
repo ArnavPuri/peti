@@ -110,6 +110,46 @@ body {
   flex-shrink: 0;
 }
 
+/* Claude activity status dots */
+.pane-card-dot.status-working {
+  background: #e5a13a;
+  animation: status-pulse 1.1s ease-in-out infinite;
+}
+
+.pane-card-dot.status-awaiting {
+  background: #5cd6ae;
+  box-shadow: 0 0 6px #5cd6aeaa;
+}
+
+.pane-card-dot.status-idle {
+  background: #4a525e;
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.field-check {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.field-check input {
+  margin-top: 2px;
+}
+
+.field-check span {
+  font-size: 12px;
+  color: #c8ccd2;
+}
+
 .pane-card-label {
   flex: 1;
   font-size: 12px;

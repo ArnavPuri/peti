@@ -1,19 +1,25 @@
 mod commands;
 mod config;
 mod pty;
+mod status;
 mod window;
 
 use pty::PtyManager;
+use status::StatusManager;
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
         .manage(PtyManager::default())
+        .manage(StatusManager::default())
         .setup(|app| {
             let _ = config::ensure_dirs();
             let handle = app.handle();
+
+            app.state::<StatusManager>().start(handle.clone());
 
             let _ = window::build_menu(handle);
             handle.on_menu_event(|app, event| {
@@ -71,9 +77,9 @@ pub fn run() {
             // kills only its own children, never another Peti's.
             if let tauri::WindowEvent::Destroyed = event {
                 if let Some(id) = window.label().strip_prefix("peti:") {
-                    window
-                        .state::<PtyManager>()
-                        .kill_by_prefix(&format!("{id}::"));
+                    let prefix = format!("{id}::");
+                    window.state::<PtyManager>().kill_by_prefix(&prefix);
+                    window.state::<StatusManager>().unregister_by_prefix(&prefix);
                 }
             }
         })

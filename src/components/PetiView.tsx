@@ -4,7 +4,10 @@ import FloatingCanvas from "./FloatingCanvas";
 import PromptBar from "./PromptBar";
 import { useWorkspaceStore } from "../stores/workspaceStore";
 import { useSettingsStore } from "../stores/settingsStore";
+import { useSessionsStore } from "../stores/sessionsStore";
 import { useUiStore } from "../stores/uiStore";
+import { onSessionStatus } from "../lib/ipc";
+import { chime, ensureNotifyPermission, notify } from "../lib/alerts";
 
 // A single self-contained Peti window.
 export default function PetiView({ petiId }: { petiId: string | null }) {
@@ -27,6 +30,31 @@ export default function PetiView({ petiId }: { petiId: string | null }) {
   useEffect(() => {
     setSendMode(settings.send_mode === "send" ? "send" : "insert");
   }, [settings.send_mode, setSendMode]);
+
+  // Track Claude activity; alert (notification + chime) when a card transitions
+  // working -> awaiting (Claude finished and wants you). Only on a real
+  // transition, so resuming an already-idle session doesn't ping.
+  useEffect(() => {
+    if (!workspace) return;
+    void ensureNotifyPermission();
+    let un: (() => void) | undefined;
+    void onSessionStatus((p) => {
+      const { activity, setActivity } = useSessionsStore.getState();
+      const prev = activity[p.session_id];
+      setActivity(p.session_id, p.state);
+      if (p.state === "awaiting" && prev === "working") {
+        if (useSettingsStore.getState().settings.alerts) {
+          const idx = Number(p.session_id.split("::")[1]);
+          const label = workspace.panes[idx]?.label ?? "Claude";
+          notify(`${label} — ready`, `${workspace.name}: Claude is awaiting your input`);
+          chime();
+        }
+      }
+    }).then((u) => {
+      un = u;
+    });
+    return () => un?.();
+  }, [workspace]);
 
   if (!petiId) {
     return (

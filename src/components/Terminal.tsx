@@ -17,9 +17,10 @@ interface Props {
   cwd: string;
   command: string;
   args: string[];
+  watchStatus: boolean;
 }
 
-export default function Terminal({ sessionId, cwd, command, args }: Props) {
+export default function Terminal({ sessionId, cwd, command, args, watchStatus }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,6 +98,7 @@ export default function Terminal({ sessionId, cwd, command, args }: Props) {
           args,
           cols: term.cols,
           rows: term.rows,
+          watchStatus,
         });
         setStatus(sessionId, "running");
         term.focus();
@@ -115,7 +117,7 @@ export default function Terminal({ sessionId, cwd, command, args }: Props) {
       remove(sessionId);
       term.dispose();
     };
-  }, [sessionId, cwd, command, args]);
+  }, [sessionId, cwd, command, args, watchStatus]);
 
   return <div className="term-host" ref={hostRef} />;
 }

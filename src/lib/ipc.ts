@@ -20,6 +20,7 @@ export function spawnPane(opts: {
   args: string[];
   cols: number;
   rows: number;
+  watchStatus: boolean;
 }): Promise<void> {
   return invoke("spawn_pane", {
     sessionId: opts.sessionId,
@@ -28,6 +29,7 @@ export function spawnPane(opts: {
     args: opts.args,
     cols: opts.cols,
     rows: opts.rows,
+    watchStatus: opts.watchStatus,
   });
 }
 
@@ -49,6 +51,19 @@ export function onPaneOutput(cb: (p: OutputPayload) => void): Promise<UnlistenFn
 
 export function onPaneExit(cb: (p: ExitPayload) => void): Promise<UnlistenFn> {
   return listen<ExitPayload>("pane://exit", (e) => cb(e.payload));
+}
+
+// ---- session activity status (from Claude's transcript) -------------------
+
+export type SessionState = "working" | "awaiting" | "idle";
+
+export interface StatusPayload {
+  session_id: string;
+  state: SessionState;
+}
+
+export function onSessionStatus(cb: (p: StatusPayload) => void): Promise<UnlistenFn> {
+  return listen<StatusPayload>("session://status", (e) => cb(e.payload));
 }
 
 // ---- workspaces -----------------------------------------------------------
@@ -152,6 +167,7 @@ export interface AppSettings {
   send_mode: "insert" | "send";
   default_model: string;
   permission_mode: string;
+  alerts: boolean;
 }
 
 export function getSettings(): Promise<AppSettings> {

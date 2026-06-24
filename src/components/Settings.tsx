@@ -9,6 +9,7 @@ export default function Settings() {
     send_mode: "insert",
     default_model: "",
     permission_mode: "",
+    alerts: true,
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +77,15 @@ export default function Settings() {
             </option>
           ))}
         </select>
+      </label>
+
+      <label className="field field-check">
+        <input
+          type="checkbox"
+          checked={settings.alerts}
+          onChange={(e) => patch({ alerts: e.target.checked })}
+        />
+        <span>Alert me (notification + chime) when a Claude card awaits my input</span>
       </label>
 
       {error && <div className="editor-error">{error}</div>}

@@ -4,22 +4,30 @@ use crate::config::settings::{self, AppSettings};
 use crate::config::tasks::{self, Task};
 use crate::config::workspace as ws;
 use crate::pty::PtyManager;
+use crate::status::StatusManager;
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_pane(
     app: AppHandle,
     manager: State<PtyManager>,
+    status: State<StatusManager>,
     session_id: String,
     cwd: String,
     command: String,
     args: Vec<String>,
     cols: u16,
     rows: u16,
+    watch_status: bool,
 ) -> Result<(), String> {
     let cwd = crate::config::expand_tilde(&cwd)
         .to_string_lossy()
         .into_owned();
-    manager.spawn(app, session_id, cwd, command, args, cols, rows)
+    manager.spawn(app, session_id.clone(), cwd.clone(), command, args, cols, rows)?;
+    if watch_status {
+        status.register(session_id, &cwd);
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -106,6 +114,11 @@ pub fn resize_pane(
 }
 
 #[tauri::command]
-pub fn kill_pane(manager: State<PtyManager>, session_id: String) -> Result<(), String> {
+pub fn kill_pane(
+    manager: State<PtyManager>,
+    status: State<StatusManager>,
+    session_id: String,
+) -> Result<(), String> {
+    status.unregister(&session_id);
     manager.kill(&session_id)
 }

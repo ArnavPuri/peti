@@ -13,6 +13,7 @@ pub struct AppSettings {
     pub send_mode: String,       // "insert" | "send"
     pub default_model: String,   // e.g. "opus" | "sonnet" | ""
     pub permission_mode: String, // e.g. "default" | "acceptEdits" | "plan" | ""
+    pub alerts: bool,            // desktop notification + chime when Claude awaits you
 }
 
 impl Default for AppSettings {
@@ -21,6 +22,7 @@ impl Default for AppSettings {
             send_mode: "insert".into(),
             default_model: String::new(),
             permission_mode: String::new(),
+            alerts: true,
         }
     }
 }

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import FloatingCard from "./FloatingCard";
 import Terminal from "./Terminal";
-import type { Rect } from "../lib/ipc";
+import type { Rect, SessionState } from "../lib/ipc";
 
 interface Props {
   index: number;
@@ -13,6 +13,8 @@ interface Props {
   cwd: string;
   command: string;
   args: string[];
+  watchStatus: boolean;
+  status?: SessionState;
   onCommit: (index: number, rect: Rect) => void;
   onFocus: (index: number) => void;
   onClose: (index: number) => void;
@@ -31,6 +33,7 @@ function PaneCard(props: Props) {
       accent={props.accent}
       title={props.label}
       variant="terminal"
+      status={props.status}
       onCommit={(r) => onCommit(index, r)}
       onFocus={() => onFocus(index)}
       onClose={() => onClose(index)}
@@ -40,6 +43,7 @@ function PaneCard(props: Props) {
         cwd={props.cwd}
         command={props.command}
         args={props.args}
+        watchStatus={props.watchStatus}
       />
     </FloatingCard>
   );

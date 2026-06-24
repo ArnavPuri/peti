@@ -5,7 +5,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
-import type { Rect } from "../lib/ipc";
+import type { Rect, SessionState } from "../lib/ipc";
 
 interface Props {
   rect: Rect;
@@ -14,6 +14,7 @@ interface Props {
   title: ReactNode;
   children: ReactNode;
   variant?: "terminal" | "note";
+  status?: SessionState;
   onCommit: (rect: Rect) => void;
   onFocus: () => void;
   onClose?: () => void;
@@ -123,7 +124,11 @@ export default function FloatingCard(props: Props) {
         onPointerMove={onDragMove}
         onPointerUp={endDrag}
       >
-        <span className="pane-card-dot" style={{ background: accent }} />
+        <span
+          className={`pane-card-dot${props.status ? ` status-${props.status}` : ""}`}
+          style={props.status ? undefined : { background: accent }}
+          title={props.status}
+        />
         <span className="pane-card-label">{title}</span>
         {onClose && (
           <button

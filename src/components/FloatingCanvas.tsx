@@ -6,6 +6,7 @@ import { saveLayout, saveNoteRect, type Rect, type Workspace } from "../lib/ipc"
 import { resolveCommand } from "../lib/command";
 import { useUiStore } from "../stores/uiStore";
 import { useSettingsStore } from "../stores/settingsStore";
+import { useSessionsStore } from "../stores/sessionsStore";
 
 function debounce<T extends (...a: never[]) => void>(fn: T, ms: number): T {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -23,6 +24,7 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
   const [closed, setClosed] = useState<Set<number>>(() => new Set());
   const setFocused = useUiStore((s) => s.setFocused);
   const settings = useSettingsStore((s) => s.settings);
+  const activity = useSessionsStore((s) => s.activity);
 
   // Stable resolved argv per pane — recomputed only when the workspace or
   // settings change, NOT on every focus/drag re-render. This is what keeps the
@@ -107,11 +109,12 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
     <div className="canvas" ref={ref}>
       {workspace.panes.map((pane, i) => {
         if (closed.has(i)) return null;
+        const sessionId = `${workspace.id}::${i}`;
         return (
           <PaneCard
-            key={`${workspace.id}::${i}`}
+            key={sessionId}
             index={i}
-            sessionId={`${workspace.id}::${i}`}
+            sessionId={sessionId}
             rect={rects[i]}
             canvas={size}
             accent={accent}
@@ -119,6 +122,8 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
             cwd={pane.path}
             command={resolved[i].command}
             args={resolved[i].args}
+            watchStatus={pane.type === "claude"}
+            status={activity[sessionId]}
             onCommit={commitRect}
             onFocus={focusPane}
             onClose={close}

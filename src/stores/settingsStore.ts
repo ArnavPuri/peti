@@ -5,6 +5,7 @@ const DEFAULTS: AppSettings = {
   send_mode: "insert",
   default_model: "",
   permission_mode: "",
+  alerts: true,
 };
 
 interface SettingsState {
