@@ -1,6 +1,6 @@
 [package]
 name = "peti"
-version = "0.0.0"
+version = "0.1.0"
 description = "Peti — a calm desktop home for the solo developer juggling many small projects"
 authors = ["Arnav Puri"]
 edition = "2021"
