@@ -342,3 +342,208 @@ body {
   color: #6b7480;
   padding-right: 4px;
 }
+
+/* ---- editor / settings forms ---- */
+
+.editor {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px 22px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.editor h1 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #5cd6ae;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field > span {
+  font-size: 11px;
+  color: #8b93a0;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-grow {
+  flex: 1;
+}
+
+.editor input,
+.editor select {
+  background: #11141a;
+  border: 1px solid #1c2128;
+  border-radius: 6px;
+  color: #e6e6e6;
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 9px;
+}
+
+.editor input:focus,
+.editor select:focus {
+  outline: none;
+  border-color: #5cd6ae88;
+}
+
+.accent-input,
+.path-input {
+  display: flex;
+  gap: 6px;
+}
+
+.accent-input input[type="color"] {
+  width: 36px;
+  padding: 2px;
+}
+
+.path-input input {
+  flex: 1;
+  min-width: 0;
+}
+
+.path-input button,
+.panes-head button {
+  flex-shrink: 0;
+  background: #1c2128;
+  border: 1px solid #2a313b;
+  border-radius: 6px;
+  color: #c8ccd2;
+  font: inherit;
+  font-size: 12px;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.path-input button:hover,
+.panes-head button:hover {
+  background: #2a313b;
+}
+
+.panes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.panes-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #8b93a0;
+}
+
+.pane-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pane-label {
+  width: 96px;
+  flex-shrink: 0;
+}
+
+.pane-path {
+  flex: 1;
+  min-width: 0;
+}
+
+.pane-command {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.pane-resume {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #8b93a0;
+}
+
+.pane-del {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #8b93a0;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.pane-del:hover {
+  background: #2a313b;
+  color: #fff;
+}
+
+.editor-error {
+  color: #e06c75;
+  font-size: 12px;
+}
+
+.editor-actions {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.editor-actions button {
+  background: #1c2128;
+  border: 1px solid #2a313b;
+  border-radius: 7px;
+  color: #c8ccd2;
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.editor-actions button:hover:not(:disabled) {
+  background: #2a313b;
+}
+
+.editor-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-primary {
+  background: #5cd6ae !important;
+  border-color: #5cd6ae !important;
+  color: #07120e !important;
+  font-weight: 600;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #6fe0bd !important;
+}
+
+.btn-danger {
+  color: #e06c75 !important;
+}
+
+.settings-note {
+  margin: 0;
+  font-size: 11px;
+  color: #6b7480;
+}

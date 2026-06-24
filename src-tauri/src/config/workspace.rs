@@ -304,6 +304,104 @@ pub fn save_note_rect(id: &str, note: Rect) -> Result<(), String> {
     write_layout_json(id, &layout)
 }
 
+// ---- create / edit / delete (in-app editor) -------------------------------
+
+/// Input from the editor form. Serializes straight to the on-disk TOML shape.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PaneInput {
+    pub label: String,
+    pub path: String,
+    #[serde(rename = "type", default)]
+    pub pane_type: PaneType,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub command: Option<String>,
+    #[serde(default)]
+    pub resume: bool,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct WorkspaceInput {
+    pub id: String,
+    pub name: String,
+    #[serde(default)]
+    pub accent: Option<String>,
+    #[serde(default)]
+    pub background: Option<String>,
+    pub panes: Vec<PaneInput>,
+}
+
+#[derive(Serialize)]
+struct MetaWrite {
+    id: String,
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    background: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    accent: Option<String>,
+}
+
+#[derive(Serialize)]
+struct WorkspaceWrite {
+    workspace: MetaWrite,
+    #[serde(rename = "pane")]
+    panes: Vec<PaneInput>,
+}
+
+fn sanitize_id(raw: &str) -> Result<String, String> {
+    let id: String = raw
+        .trim()
+        .to_lowercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .collect();
+    let id = id.trim_matches('-').to_string();
+    if id.is_empty() {
+        return Err("workspace id/name must contain at least one letter or digit".into());
+    }
+    Ok(id)
+}
+
+/// Render an editor input to (sanitized id, TOML string). Pure — no fs.
+fn render_workspace_toml(input: WorkspaceInput) -> Result<(String, String), String> {
+    let id = sanitize_id(&input.id)?;
+    let empty = |s: &Option<String>| s.as_ref().map(|v| v.trim().is_empty()).unwrap_or(true);
+    let doc = WorkspaceWrite {
+        workspace: MetaWrite {
+            id: id.clone(),
+            name: input.name.trim().to_string(),
+            background: if empty(&input.background) { None } else { input.background },
+            accent: if empty(&input.accent) { None } else { input.accent },
+        },
+        panes: input.panes,
+    };
+    let toml = toml::to_string_pretty(&doc).map_err(|e| e.to_string())?;
+    Ok((id, toml))
+}
+
+/// Write a global workspace TOML from the editor. Returns the (sanitized) id.
+pub fn save_workspace(input: WorkspaceInput) -> Result<String, String> {
+    super::ensure_dirs()?;
+    let (id, toml) = render_workspace_toml(input)?;
+    fs::write(workspaces_dir()?.join(format!("{id}.toml")), toml).map_err(|e| e.to_string())?;
+    Ok(id)
+}
+
+/// Delete a global workspace and its app-managed sidecars; drop any pointer.
+pub fn delete_workspace(id: &str) -> Result<(), String> {
+    let dir = workspaces_dir()?;
+    for suffix in ["toml", "layout.json", "tasks.json"] {
+        let _ = fs::remove_file(dir.join(format!("{id}.{suffix}")));
+    }
+    let entries: Vec<PointerEntry> = read_registry().into_iter().filter(|e| e.id != id).collect();
+    if let Ok(path) = registry_path() {
+        let _ = fs::write(
+            path,
+            serde_json::to_string_pretty(&entries).unwrap_or_else(|_| "[]".into()),
+        );
+    }
+    Ok(())
+}
+
 /// Register an in-repo `.peti/workspace.toml` by absolute path. Validates that
 /// it parses (and grabs its id) before recording the pointer.
 pub fn add_workspace_pointer(path: String) -> Result<(), String> {
@@ -410,5 +508,48 @@ command = "zsh"
     #[test]
     fn rejects_invalid_toml() {
         assert!(parse_workspace_file("not = [valid").is_err());
+    }
+
+    #[test]
+    fn sanitize_id_slugs_and_rejects_empty() {
+        assert_eq!(sanitize_id("Chanakya AI!").unwrap(), "chanakya-ai");
+        assert!(sanitize_id("  ").is_err());
+        assert!(sanitize_id("***").is_err());
+    }
+
+    #[test]
+    fn editor_output_round_trips() {
+        let input = WorkspaceInput {
+            id: "My Cool Peti".into(),
+            name: "My Cool Peti".into(),
+            accent: Some("#5CD6AE".into()),
+            background: None, // omitted -> absent in TOML
+            panes: vec![
+                PaneInput {
+                    label: "api".into(),
+                    path: "~/dev/api".into(),
+                    pane_type: PaneType::Claude,
+                    command: None,
+                    resume: true,
+                },
+                PaneInput {
+                    label: "sh".into(),
+                    path: "~/dev".into(),
+                    pane_type: PaneType::Shell,
+                    command: Some("zsh".into()),
+                    resume: false,
+                },
+            ],
+        };
+        let (id, toml) = render_workspace_toml(input).unwrap();
+        assert_eq!(id, "my-cool-peti");
+
+        let parsed = parse_workspace_file(&toml).unwrap();
+        assert_eq!(parsed.workspace.id, "my-cool-peti");
+        assert_eq!(parsed.workspace.background, None);
+        assert_eq!(parsed.pane.len(), 2);
+        assert!(parsed.pane[0].resume);
+        assert_eq!(parsed.pane[1].pane_type, PaneType::Shell);
+        assert_eq!(parsed.pane[1].command.as_deref(), Some("zsh"));
     }
 }

@@ -1,5 +1,6 @@
 use tauri::{AppHandle, State};
 
+use crate::config::settings::{self, AppSettings};
 use crate::config::tasks::{self, Task};
 use crate::config::workspace as ws;
 use crate::pty::PtyManager;
@@ -59,6 +60,30 @@ pub fn list_tasks(id: String) -> Vec<Task> {
 #[tauri::command]
 pub fn save_tasks(id: String, tasks: Vec<Task>) -> Result<(), String> {
     crate::config::tasks::save_tasks(&id, tasks)
+}
+
+#[tauri::command]
+pub fn save_workspace(app: AppHandle, workspace: ws::WorkspaceInput) -> Result<String, String> {
+    let id = ws::save_workspace(workspace)?;
+    crate::window::build_menu(&app)?; // surface the new/renamed Peti in the menu
+    Ok(id)
+}
+
+#[tauri::command]
+pub fn delete_workspace(app: AppHandle, id: String) -> Result<(), String> {
+    ws::delete_workspace(&id)?;
+    crate::window::build_menu(&app)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_settings() -> AppSettings {
+    settings::get_settings()
+}
+
+#[tauri::command]
+pub fn save_settings(settings: AppSettings) -> Result<(), String> {
+    crate::config::settings::save_settings(settings)
 }
 
 #[tauri::command]

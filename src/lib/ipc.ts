@@ -118,3 +118,46 @@ export function listTasks(id: string): Promise<Task[]> {
 export function saveTasks(id: string, tasks: Task[]): Promise<void> {
   return invoke("save_tasks", { id, tasks });
 }
+
+// ---- editor (create / edit / delete) --------------------------------------
+
+export interface PaneInput {
+  label: string;
+  path: string;
+  type: PaneType;
+  command: string | null;
+  resume: boolean;
+}
+
+export interface WorkspaceInput {
+  id: string;
+  name: string;
+  accent: string | null;
+  background: string | null;
+  panes: PaneInput[];
+}
+
+// Returns the sanitized id the workspace was saved under.
+export function saveWorkspace(workspace: WorkspaceInput): Promise<string> {
+  return invoke("save_workspace", { workspace });
+}
+
+export function deleteWorkspace(id: string): Promise<void> {
+  return invoke("delete_workspace", { id });
+}
+
+// ---- settings -------------------------------------------------------------
+
+export interface AppSettings {
+  send_mode: "insert" | "send";
+  default_model: string;
+  permission_mode: string;
+}
+
+export function getSettings(): Promise<AppSettings> {
+  return invoke("get_settings");
+}
+
+export function saveSettings(settings: AppSettings): Promise<void> {
+  return invoke("save_settings", { settings });
+}

@@ -5,6 +5,7 @@ import TaskNote from "./TaskNote";
 import { saveLayout, saveNoteRect, type Rect, type Workspace } from "../lib/ipc";
 import { resolveCommand } from "../lib/command";
 import { useUiStore } from "../stores/uiStore";
+import { useSettingsStore } from "../stores/settingsStore";
 
 function debounce<T extends (...a: never[]) => void>(fn: T, ms: number): T {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -21,6 +22,7 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
   const [noteRect, setNoteRect] = useState<Rect>(() => ({ ...workspace.note }));
   const [closed, setClosed] = useState<Set<number>>(() => new Set());
   const setFocused = useUiStore((s) => s.setFocused);
+  const settings = useSettingsStore((s) => s.settings);
 
   // Monotonic z so "bring to front" is O(1) and shared across cards + note.
   const zCounter = useRef(Math.max(...workspace.rects.map((r) => r.z), workspace.note.z));
@@ -89,7 +91,7 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
       {workspace.panes.map((pane, i) => {
         if (closed.has(i)) return null;
         const sessionId = `${workspace.id}::${i}`;
-        const { command, args } = resolveCommand(pane);
+        const { command, args } = resolveCommand(pane, settings);
         return (
           <FloatingCard
             key={sessionId}

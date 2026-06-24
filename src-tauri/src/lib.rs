@@ -9,6 +9,7 @@ use tauri::Manager;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(PtyManager::default())
         .setup(|app| {
             let _ = config::ensure_dirs();
@@ -16,8 +17,15 @@ pub fn run() {
 
             let _ = window::build_menu(handle);
             handle.on_menu_event(|app, event| {
-                if let Some(id) = event.id().0.strip_prefix("open:") {
-                    let _ = window::open_peti_window(app, id);
+                let id = event.id().0.as_str();
+                if let Some(ws) = id.strip_prefix("open:") {
+                    let _ = window::open_peti_window(app, ws);
+                } else if let Some(ws) = id.strip_prefix("edit:") {
+                    let _ = window::open_editor_window(app, ws);
+                } else if id == "new-peti" {
+                    let _ = window::open_editor_window(app, "new");
+                } else if id == "settings" {
+                    let _ = window::open_settings_window(app);
                 }
             });
 
@@ -53,6 +61,10 @@ pub fn run() {
             commands::open_peti,
             commands::list_tasks,
             commands::save_tasks,
+            commands::save_workspace,
+            commands::delete_workspace,
+            commands::get_settings,
+            commands::save_settings,
         ])
         .on_window_event(|window, event| {
             // Orphan cleanup (PRD §3.2), window-scoped: a Peti window closing
