@@ -4,7 +4,6 @@ import Terminal from "./Terminal";
 import { gitStatus, type GitInfo, type Rect, type SessionState } from "../lib/ipc";
 
 interface Props {
-  index: number;
   sessionId: string;
   rect: Rect;
   canvas: { w: number; h: number };
@@ -15,9 +14,9 @@ interface Props {
   args: string[];
   watchStatus: boolean;
   status?: SessionState;
-  onCommit: (index: number, rect: Rect) => void;
-  onFocus: (index: number) => void;
-  onClose: (index: number) => void;
+  onCommit: (sessionId: string, rect: Rect) => void;
+  onFocus: (sessionId: string) => void;
+  onClose: (sessionId: string) => void;
 }
 
 // Memoized so focusing one card (which re-renders FloatingCanvas) doesn't
@@ -25,7 +24,7 @@ interface Props {
 // which only changes for the card that actually moved/focused — so siblings
 // skip rendering entirely, and crucially their Terminal effect never re-runs.
 function PaneCard(props: Props) {
-  const { index, onCommit, onFocus, onClose } = props;
+  const { sessionId, onCommit, onFocus, onClose } = props;
   const [git, setGit] = useState<GitInfo | null>(null);
 
   // Poll the pane's repo (branch + dirty) every few seconds.
@@ -52,9 +51,9 @@ function PaneCard(props: Props) {
       variant="terminal"
       status={props.status}
       git={git}
-      onCommit={(r) => onCommit(index, r)}
-      onFocus={() => onFocus(index)}
-      onClose={() => onClose(index)}
+      onCommit={(r) => onCommit(sessionId, r)}
+      onFocus={() => onFocus(sessionId)}
+      onClose={() => onClose(sessionId)}
     >
       <Terminal
         sessionId={props.sessionId}
