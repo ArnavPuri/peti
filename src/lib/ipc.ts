@@ -66,6 +66,17 @@ export function onSessionStatus(cb: (p: StatusPayload) => void): Promise<Unliste
   return listen<StatusPayload>("session://status", (e) => cb(e.payload));
 }
 
+// ---- git status (per pane) ------------------------------------------------
+
+export interface GitInfo {
+  branch: string;
+  dirty: boolean;
+}
+
+export function gitStatus(cwd: string): Promise<GitInfo | null> {
+  return invoke("git_status", { cwd });
+}
+
 // ---- workspaces -----------------------------------------------------------
 
 export type PaneType = "claude" | "shell";

@@ -1,5 +1,6 @@
 mod commands;
 mod config;
+mod git;
 mod pty;
 mod status;
 mod window;
@@ -77,6 +78,7 @@ pub fn run() {
             commands::save_settings,
             commands::list_snippets,
             commands::save_snippets,
+            commands::git_status,
         ])
         .on_window_event(|window, event| {
             // Orphan cleanup (PRD §3.2), window-scoped: a Peti window closing

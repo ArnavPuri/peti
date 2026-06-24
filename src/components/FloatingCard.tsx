@@ -5,7 +5,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
-import type { Rect, SessionState } from "../lib/ipc";
+import type { GitInfo, Rect, SessionState } from "../lib/ipc";
 
 interface Props {
   rect: Rect;
@@ -15,6 +15,7 @@ interface Props {
   children: ReactNode;
   variant?: "terminal" | "note";
   status?: SessionState;
+  git?: GitInfo | null;
   onCommit: (rect: Rect) => void;
   onFocus: () => void;
   onClose?: () => void;
@@ -130,6 +131,12 @@ export default function FloatingCard(props: Props) {
           title={props.status}
         />
         <span className="pane-card-label">{title}</span>
+        {props.git && (
+          <span className="pane-card-git" title={props.git.dirty ? "uncommitted changes" : "clean"}>
+            <span className="git-branch">⎇ {props.git.branch}</span>
+            {props.git.dirty && <span className="git-dirty" />}
+          </span>
+        )}
         {onClose && (
           <button
             className="pane-card-close"

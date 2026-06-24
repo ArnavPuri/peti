@@ -118,6 +118,11 @@ pub fn save_snippets(snippets: Vec<crate::config::snippets::Snippet>) -> Result<
 }
 
 #[tauri::command]
+pub fn git_status(cwd: String) -> Option<crate::git::GitInfo> {
+    crate::git::status(&cwd)
+}
+
+#[tauri::command]
 pub fn get_settings() -> AppSettings {
     settings::get_settings()
 }

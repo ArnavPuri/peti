@@ -213,6 +213,30 @@ body {
   white-space: nowrap;
 }
 
+.pane-card-git {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 130px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.git-branch {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.git-dirty {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e5a13a;
+  flex-shrink: 0;
+}
+
 .pane-card-close {
   flex-shrink: 0;
   width: 18px;

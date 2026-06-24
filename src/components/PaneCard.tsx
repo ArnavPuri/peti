@@ -1,7 +1,7 @@
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import FloatingCard from "./FloatingCard";
 import Terminal from "./Terminal";
-import type { Rect, SessionState } from "../lib/ipc";
+import { gitStatus, type GitInfo, type Rect, type SessionState } from "../lib/ipc";
 
 interface Props {
   index: number;
@@ -26,6 +26,23 @@ interface Props {
 // skip rendering entirely, and crucially their Terminal effect never re-runs.
 function PaneCard(props: Props) {
   const { index, onCommit, onFocus, onClose } = props;
+  const [git, setGit] = useState<GitInfo | null>(null);
+
+  // Poll the pane's repo (branch + dirty) every few seconds.
+  useEffect(() => {
+    let alive = true;
+    const tick = () =>
+      gitStatus(props.cwd)
+        .then((g) => alive && setGit(g))
+        .catch(() => {});
+    tick();
+    const iv = setInterval(tick, 5000);
+    return () => {
+      alive = false;
+      clearInterval(iv);
+    };
+  }, [props.cwd]);
+
   return (
     <FloatingCard
       rect={props.rect}
@@ -34,6 +51,7 @@ function PaneCard(props: Props) {
       title={props.label}
       variant="terminal"
       status={props.status}
+      git={git}
       onCommit={(r) => onCommit(index, r)}
       onFocus={() => onFocus(index)}
       onClose={() => onClose(index)}
