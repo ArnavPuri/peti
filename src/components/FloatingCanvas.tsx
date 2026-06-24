@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import FloatingCard from "./FloatingCard";
-import Terminal from "./Terminal";
+import PaneCard from "./PaneCard";
 import TaskNote from "./TaskNote";
 import { saveLayout, saveNoteRect, type Rect, type Workspace } from "../lib/ipc";
 import { resolveCommand } from "../lib/command";
@@ -24,11 +24,18 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
   const setFocused = useUiStore((s) => s.setFocused);
   const settings = useSettingsStore((s) => s.settings);
 
+  // Stable resolved argv per pane — recomputed only when the workspace or
+  // settings change, NOT on every focus/drag re-render. This is what keeps the
+  // Terminal effect's `args` dependency stable so PTYs aren't torn down.
+  const resolved = useMemo(
+    () => workspace.panes.map((p) => resolveCommand(p, settings)),
+    [workspace, settings],
+  );
+
   // Monotonic z so "bring to front" is O(1) and shared across cards + note.
   const zCounter = useRef(Math.max(...workspace.rects.map((r) => r.z), workspace.note.z));
   const nextZ = () => (zCounter.current += 1);
 
-  // Measure the canvas in px (useLayoutEffect so first paint has real sizes).
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -39,7 +46,6 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
     return () => ro.disconnect();
   }, []);
 
-  // Focus the first pane by default so the prompt bar has a target.
   useEffect(() => {
     if (workspace.panes.length > 0) setFocused(`${workspace.id}::0`);
   }, [workspace.id, workspace.panes.length, setFocused]);
@@ -53,59 +59,70 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
     [workspace.id],
   );
 
-  const commitRect = (i: number, rect: Rect) =>
-    setRects((prev) => {
-      const next = prev.map((r, j) => (j === i ? rect : r));
-      persistRects(next);
-      return next;
-    });
+  // Stable callbacks (take an index) so PaneCard's memo holds for siblings.
+  const commitRect = useCallback(
+    (i: number, rect: Rect) =>
+      setRects((prev) => {
+        const next = prev.map((r, j) => (j === i ? rect : r));
+        persistRects(next);
+        return next;
+      }),
+    [persistRects],
+  );
 
-  const focusPane = (i: number, sessionId: string) => {
-    const z = nextZ();
-    setRects((prev) => {
-      const next = prev.map((r, j) => (j === i ? { ...r, z } : r));
-      persistRects(next);
-      return next;
-    });
-    setFocused(sessionId);
-  };
+  const focusPane = useCallback(
+    (i: number) => {
+      const z = nextZ();
+      setRects((prev) => {
+        const next = prev.map((r, j) => (j === i ? { ...r, z } : r));
+        persistRects(next);
+        return next;
+      });
+      setFocused(`${workspace.id}::${i}`);
+    },
+    [persistRects, setFocused, workspace.id],
+  );
 
-  const commitNote = (rect: Rect) => {
-    setNoteRect(rect);
-    persistNote(rect);
-  };
-  const focusNote = () => {
+  const close = useCallback((i: number) => setClosed((prev) => new Set(prev).add(i)), []);
+
+  const commitNote = useCallback(
+    (rect: Rect) => {
+      setNoteRect(rect);
+      persistNote(rect);
+    },
+    [persistNote],
+  );
+  const focusNote = useCallback(() => {
     const z = nextZ();
     setNoteRect((prev) => {
       const next = { ...prev, z };
       persistNote(next);
       return next;
     });
-  };
+  }, [persistNote]);
 
-  const close = (i: number) => setClosed((prev) => new Set(prev).add(i));
   const accent = workspace.accent ?? "#5cd6ae";
 
   return (
     <div className="canvas" ref={ref}>
       {workspace.panes.map((pane, i) => {
         if (closed.has(i)) return null;
-        const sessionId = `${workspace.id}::${i}`;
-        const { command, args } = resolveCommand(pane, settings);
         return (
-          <FloatingCard
-            key={sessionId}
+          <PaneCard
+            key={`${workspace.id}::${i}`}
+            index={i}
+            sessionId={`${workspace.id}::${i}`}
             rect={rects[i]}
             canvas={size}
             accent={accent}
-            title={pane.label}
-            variant="terminal"
-            onCommit={(r) => commitRect(i, r)}
-            onFocus={() => focusPane(i, sessionId)}
-            onClose={() => close(i)}
-          >
-            <Terminal sessionId={sessionId} cwd={pane.path} command={command} args={args} />
-          </FloatingCard>
+            label={pane.label}
+            cwd={pane.path}
+            command={resolved[i].command}
+            args={resolved[i].args}
+            onCommit={commitRect}
+            onFocus={focusPane}
+            onClose={close}
+          />
         );
       })}
 
