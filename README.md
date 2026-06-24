@@ -13,10 +13,14 @@ See [`PRD.md`](./PRD.md) for the full product spec and phased plan.
 
 | Phase | What | State |
 |---|---|---|
-| **0** | Terminal spike — prove a PTY ↔ xterm round-trip running real `claude` | **in progress** |
-| 1 | Workspaces (config, multi-pane layout, switcher) | not started |
-| 2 | Core loop (tasks + send-to-Claude + resume) | not started |
-| 3 | Identity → v1 (backgrounds, in-app editor, packaged builds) | not started |
+| **0** | Terminal spike — PTY ↔ xterm round-trip running real `claude` | **done** |
+| **1** | Self-contained Peti shell — one window per Peti, free-floating Claude cards over a background | **in progress** |
+| 2 | Core loop (task note + prompt bar + send-to-Claude + resume) | not started |
+| 3 | Authoring & ship → v1 (in-app editor, settings, packaged builds) | not started |
+
+Each **Peti** opens as its own window (chosen from a native menu) — no in-app switcher, no launcher.
+Inside, its repos run as draggable, resizable, translucent terminal cards over a recognisable
+background. See [`PRD.md`](./PRD.md) for the full architecture and phased plan.
 
 ## Stack
 
