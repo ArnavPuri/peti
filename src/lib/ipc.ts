@@ -77,9 +77,31 @@ export function gitStatus(cwd: string): Promise<GitInfo | null> {
   return invoke("git_status", { cwd });
 }
 
+// ---- code viewer (read-only file browser) ---------------------------------
+
+export interface FsEntry {
+  name: string;
+  path: string;
+  is_dir: boolean;
+}
+
+export interface FileContents {
+  content: string;
+  truncated: boolean;
+  binary: boolean;
+}
+
+export function listDir(path: string): Promise<FsEntry[]> {
+  return invoke("list_dir", { path });
+}
+
+export function readFile(path: string): Promise<FileContents> {
+  return invoke("read_file", { path });
+}
+
 // ---- workspaces -----------------------------------------------------------
 
-export type PaneType = "claude" | "shell";
+export type PaneType = "claude" | "shell" | "code";
 
 export interface PaneDef {
   label: string;

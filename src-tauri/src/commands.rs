@@ -133,6 +133,16 @@ pub fn git_status(cwd: String) -> Option<crate::git::GitInfo> {
 }
 
 #[tauri::command]
+pub fn list_dir(path: String) -> Result<Vec<crate::fsview::DirEntry>, String> {
+    crate::fsview::list_dir(&path)
+}
+
+#[tauri::command]
+pub fn read_file(path: String) -> Result<crate::fsview::FileContents, String> {
+    crate::fsview::read_file(&path)
+}
+
+#[tauri::command]
 pub fn get_settings() -> AppSettings {
     settings::get_settings()
 }

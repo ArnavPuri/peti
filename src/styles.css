@@ -347,6 +347,94 @@ body {
   background: linear-gradient(135deg, transparent 50%, rgba(127, 127, 127, 0.35) 50%);
 }
 
+/* ---- code viewer card ---- */
+
+.cv {
+  display: flex;
+  height: 100%;
+  background: #0d1117;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cv-tree {
+  width: 38%;
+  max-width: 260px;
+  min-width: 120px;
+  overflow: auto;
+  padding: 4px 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+}
+
+.cv-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 2px 0;
+  cursor: pointer;
+  color: #c8ccd2;
+  white-space: nowrap;
+}
+
+.cv-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cv-row.active {
+  background: rgba(92, 214, 174, 0.15);
+  color: #fff;
+}
+
+.cv-caret {
+  width: 12px;
+  flex-shrink: 0;
+  text-align: center;
+  color: #6b7480;
+  font-size: 9px;
+}
+
+.cv-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cv-view {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  position: relative;
+}
+
+.cv-empty {
+  padding: 16px;
+  color: #6b7480;
+  font-size: 12px;
+}
+
+.cv-pre {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.cv-pre code.hljs {
+  background: transparent;
+  padding: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre;
+}
+
+.cv-trunc {
+  position: sticky;
+  bottom: 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: #e5a13a;
+  background: #0d1117;
+}
+
 /* ---- task note card ---- */
 
 .pane-card--note {

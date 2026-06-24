@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from "react";
 import FloatingCard from "./FloatingCard";
 import Terminal from "./Terminal";
+import CodeViewer from "./CodeViewer";
 import { gitStatus, type GitInfo, type Rect, type SessionState } from "../lib/ipc";
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
   cwd: string;
   command: string;
   args: string[];
+  kind: "terminal" | "code";
   watchStatus: boolean;
   status?: SessionState;
   onCommit: (sessionId: string, rect: Rect) => void;
@@ -55,13 +57,17 @@ function PaneCard(props: Props) {
       onFocus={() => onFocus(sessionId)}
       onClose={() => onClose(sessionId)}
     >
-      <Terminal
-        sessionId={props.sessionId}
-        cwd={props.cwd}
-        command={props.command}
-        args={props.args}
-        watchStatus={props.watchStatus}
-      />
+      {props.kind === "code" ? (
+        <CodeViewer cwd={props.cwd} />
+      ) : (
+        <Terminal
+          sessionId={props.sessionId}
+          cwd={props.cwd}
+          command={props.command}
+          args={props.args}
+          watchStatus={props.watchStatus}
+        />
+      )}
     </FloatingCard>
   );
 }

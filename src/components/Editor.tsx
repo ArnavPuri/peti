@@ -315,6 +315,7 @@ export default function Editor({ target }: { target: string }) {
             >
               <option value="claude">claude</option>
               <option value="shell">shell</option>
+              <option value="code">code</option>
             </select>
             <input
               className="pane-command"

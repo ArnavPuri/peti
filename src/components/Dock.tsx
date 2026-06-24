@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { SessionState } from "../lib/ipc";
+import type { PaneType, SessionState } from "../lib/ipc";
 
 export interface DockCard {
   sid: string;
@@ -12,7 +12,7 @@ interface Props {
   cards: DockCard[];
   onRaise: (sid: string) => void;
   onClose: (sid: string) => void;
-  onAdd: (type: "claude" | "shell", pickFolder: boolean) => void;
+  onAdd: (type: PaneType, pickFolder: boolean) => void;
 }
 
 // A slim overview rail of every card (status dot + raise + close) plus a +
@@ -20,7 +20,7 @@ interface Props {
 export default function Dock({ cards, onRaise, onClose, onAdd }: Props) {
   const [addOpen, setAddOpen] = useState(false);
 
-  const add = (type: "claude" | "shell", pickFolder: boolean) => {
+  const add = (type: PaneType, pickFolder: boolean) => {
     setAddOpen(false);
     onAdd(type, pickFolder);
   };
@@ -53,9 +53,11 @@ export default function Dock({ cards, onRaise, onClose, onAdd }: Props) {
           <div className="dock-add-pop">
             <button onClick={() => add("claude", false)}>New Claude (here)</button>
             <button onClick={() => add("shell", false)}>New Shell (here)</button>
+            <button onClick={() => add("code", false)}>New Code viewer (here)</button>
             <div className="dock-add-sep" />
             <button onClick={() => add("claude", true)}>Claude in folder…</button>
             <button onClick={() => add("shell", true)}>Shell in folder…</button>
+            <button onClick={() => add("code", true)}>Code viewer in folder…</button>
           </div>
         )}
       </div>

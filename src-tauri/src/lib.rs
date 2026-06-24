@@ -1,5 +1,6 @@
 mod commands;
 mod config;
+mod fsview;
 mod git;
 mod launcher;
 mod pty;
@@ -160,6 +161,8 @@ pub fn run() {
             commands::list_snippets,
             commands::save_snippets,
             commands::git_status,
+            commands::list_dir,
+            commands::read_file,
         ])
         .on_window_event(|window, event| {
             // Orphan cleanup (PRD §3.2), window-scoped: a Peti window closing

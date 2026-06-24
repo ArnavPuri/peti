@@ -225,6 +225,7 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
             cwd={pane.path}
             command={resolved[i].command}
             args={resolved[i].args}
+            kind={pane.type === "code" ? "code" : "terminal"}
             watchStatus={pane.type === "claude"}
             status={activity[sid]}
             onCommit={commit}
@@ -245,6 +246,7 @@ export default function FloatingCanvas({ workspace }: { workspace: Workspace }) 
           cwd={e.cwd}
           command={resolvedExtras[k].command}
           args={resolvedExtras[k].args}
+          kind={e.type === "code" ? "code" : "terminal"}
           watchStatus={e.type === "claude"}
           status={activity[e.sid]}
           onCommit={commit}

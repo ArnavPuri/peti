@@ -19,6 +19,7 @@ pub enum PaneType {
     #[default]
     Claude,
     Shell,
+    Code,
 }
 
 /// Authored starting geometry on a `[[pane]]` (fractions of the canvas).
