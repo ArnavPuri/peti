@@ -20,6 +20,8 @@ pub fn open_peti_window(app: &AppHandle, id: &str) -> Result<(), String> {
         .map(|w| w.name)
         .unwrap_or_else(|_| id.to_string());
 
+    // Immersive: no native title bar, filling the screen. The dock/prompt bar
+    // are the only chrome. Close/quit via the menu (Cmd+W / Cmd+Q).
     WebviewWindowBuilder::new(
         app,
         &label,
@@ -27,6 +29,8 @@ pub fn open_peti_window(app: &AppHandle, id: &str) -> Result<(), String> {
     )
     .title(title)
     .inner_size(1100.0, 760.0)
+    .decorations(false)
+    .maximized(true)
     .build()
     .map_err(|e| e.to_string())?;
 
