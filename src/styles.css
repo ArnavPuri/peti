@@ -504,6 +504,18 @@ body {
   box-shadow: 0 12px 40px var(--shadow);
 }
 
+.bgswitch-section {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin: 2px 0 6px;
+}
+
+.bgswitch-section + .bgswitch-grid {
+  margin-bottom: 8px;
+}
+
 .bgswitch-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useWorkspaceStore } from "../stores/workspaceStore";
 import { PRESETS, accentGradient } from "../lib/backgrounds";
+import { WALLPAPERS } from "../lib/wallpapers";
 
 // A small in-Peti control to swap the background live (presets / own image /
 // accent gradient) without opening the editor. Persisted via the store.
@@ -31,6 +32,7 @@ export default function BackgroundSwitcher() {
     <div className="bgswitch">
       {open_ && (
         <div className="bgswitch-pop">
+          <div className="bgswitch-section">Gradients</div>
           <div className="bgswitch-grid">
             <button
               className={"bgswitch-swatch" + (current === "" ? " active" : "")}
@@ -48,6 +50,20 @@ export default function BackgroundSwitcher() {
               />
             ))}
           </div>
+
+          <div className="bgswitch-section">Wallpapers</div>
+          <div className="bgswitch-grid">
+            {WALLPAPERS.map((w) => (
+              <button
+                key={w.id}
+                className={"bgswitch-swatch" + (current === `wallpaper:${w.id}` ? " active" : "")}
+                style={{ backgroundImage: `url(${w.url})` }}
+                title={w.label}
+                onClick={() => pick(`wallpaper:${w.id}`)}
+              />
+            ))}
+          </div>
+
           <button className="bgswitch-image" onClick={pickImage}>
             Choose image…
           </button>

@@ -170,7 +170,7 @@ fn resolve_background(raw: Option<&str>) -> Option<String> {
     if raw.is_empty() {
         return None;
     }
-    if raw.starts_with("preset:") {
+    if raw.starts_with("preset:") || raw.starts_with("wallpaper:") {
         return Some(raw.to_string());
     }
     let expanded = expand_tilde(raw);
