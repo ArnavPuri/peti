@@ -517,6 +517,101 @@ body {
   padding-right: 4px;
 }
 
+.promptbar-snips {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.snips-pop {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  width: 280px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(13, 15, 18, 0.95);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.snips-list {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.snips-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.snips-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.snips-use {
+  flex: 1;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: #d6dae0;
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 8px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snips-del {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: #8b93a0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.snips-del:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.snips-empty {
+  color: #6b7480;
+  font-size: 12px;
+  padding: 8px;
+}
+
+.snips-save {
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #c8ccd2;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.snips-save:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.snips-save:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* ---- editor / settings forms ---- */
 
 .editor {

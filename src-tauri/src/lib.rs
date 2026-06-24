@@ -75,6 +75,8 @@ pub fn run() {
             commands::import_workspace,
             commands::get_settings,
             commands::save_settings,
+            commands::list_snippets,
+            commands::save_snippets,
         ])
         .on_window_event(|window, event| {
             // Orphan cleanup (PRD §3.2), window-scoped: a Peti window closing

@@ -9,6 +9,7 @@ use directories::{BaseDirs, ProjectDirs};
 
 pub mod scan;
 pub mod settings;
+pub mod snippets;
 pub mod tasks;
 pub mod workspace;
 

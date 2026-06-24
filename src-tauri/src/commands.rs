@@ -108,6 +108,16 @@ pub fn import_workspace(app: AppHandle, src: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+pub fn list_snippets() -> Vec<crate::config::snippets::Snippet> {
+    crate::config::snippets::list_snippets()
+}
+
+#[tauri::command]
+pub fn save_snippets(snippets: Vec<crate::config::snippets::Snippet>) -> Result<(), String> {
+    crate::config::snippets::save_snippets(snippets)
+}
+
+#[tauri::command]
 pub fn get_settings() -> AppSettings {
     settings::get_settings()
 }

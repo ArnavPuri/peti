@@ -200,3 +200,19 @@ export function getSettings(): Promise<AppSettings> {
 export function saveSettings(settings: AppSettings): Promise<void> {
   return invoke("save_settings", { settings });
 }
+
+// ---- prompt snippets (app-global) -----------------------------------------
+
+export interface Snippet {
+  id: string;
+  title: string;
+  text: string;
+}
+
+export function listSnippets(): Promise<Snippet[]> {
+  return invoke("list_snippets");
+}
+
+export function saveSnippets(snippets: Snippet[]): Promise<void> {
+  return invoke("save_snippets", { snippets });
+}
