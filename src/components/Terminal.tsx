@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
+import { SearchAddon } from "@xterm/addon-search";
 import "@xterm/xterm/css/xterm.css";
 import {
   spawnPane,
@@ -20,8 +21,16 @@ interface Props {
   watchStatus: boolean;
 }
 
+const MIN_FONT = 9;
+const MAX_FONT = 22;
+
 export default function Terminal({ sessionId, cwd, command, args, watchStatus }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
+  const termRef = useRef<XTerm | null>(null);
+  const searchRef = useRef<SearchAddon | null>(null);
+  const fitRef = useRef<FitAddon | null>(null);
+  const [findOpen, setFindOpen] = useState(false);
+  const [findText, setFindText] = useState("");
 
   useEffect(() => {
     const host = hostRef.current;
@@ -36,12 +45,18 @@ export default function Terminal({ sessionId, cwd, command, args, watchStatus }:
       fontSize: 13,
       cursorBlink: true,
       allowProposedApi: true,
+      scrollback: 5000,
       theme: { background: "#0d0f12", foreground: "#e6e6e6" },
     });
     const fit = new FitAddon();
+    const search = new SearchAddon();
     term.loadAddon(fit);
+    term.loadAddon(search);
     term.open(host);
     fit.fit();
+    termRef.current = term;
+    fitRef.current = fit;
+    searchRef.current = search;
 
     // keystrokes -> pty
     const encoder = new TextEncoder();
@@ -49,9 +64,52 @@ export default function Terminal({ sessionId, cwd, command, args, watchStatus }:
       void writePane(sessionId, encoder.encode(data));
     });
 
-    // container resize (window OR card drag-resize) -> fit -> pty resize.
-    // rAF-coalesced and guarded so a live resize doesn't spam fit/SIGWINCH; we
-    // only message the PTY when the grid (cols/rows) actually changes.
+    // QoL keybindings handled here so they don't reach the PTY.
+    term.attachCustomKeyEventHandler((e) => {
+      if (e.type !== "keydown") return true;
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return true;
+      const key = e.key.toLowerCase();
+
+      // Cmd/Ctrl+C copies only when there's a selection; otherwise let it
+      // through as SIGINT.
+      if (key === "c" && term.hasSelection()) {
+        void navigator.clipboard.writeText(term.getSelection());
+        return false;
+      }
+      if (key === "v") {
+        void navigator.clipboard.readText().then((t) => {
+          if (t) void writePane(sessionId, encoder.encode(t));
+        });
+        return false;
+      }
+      if (key === "k") {
+        term.clear();
+        return false;
+      }
+      if (key === "f") {
+        setFindOpen(true);
+        return false;
+      }
+      if (key === "=" || key === "+") {
+        term.options.fontSize = Math.min((term.options.fontSize ?? 13) + 1, MAX_FONT);
+        fit.fit();
+        return false;
+      }
+      if (key === "-") {
+        term.options.fontSize = Math.max((term.options.fontSize ?? 13) - 1, MIN_FONT);
+        fit.fit();
+        return false;
+      }
+      if (key === "0") {
+        term.options.fontSize = 13;
+        fit.fit();
+        return false;
+      }
+      return true;
+    });
+
+    // container resize -> fit -> pty resize (rAF-coalesced, change-guarded).
     let raf = 0;
     let lastCols = -1;
     let lastRows = -1;
@@ -82,7 +140,6 @@ export default function Terminal({ sessionId, cwd, command, args, watchStatus }:
       });
       unlisteners.push(unOut, unExit);
 
-      // cleanup may have already run while we awaited the listeners
       if (disposed) {
         unOut();
         unExit();
@@ -116,8 +173,62 @@ export default function Terminal({ sessionId, cwd, command, args, watchStatus }:
       void killPane(sessionId);
       remove(sessionId);
       term.dispose();
+      termRef.current = null;
+      searchRef.current = null;
+      fitRef.current = null;
     };
   }, [sessionId, cwd, command, args, watchStatus]);
 
-  return <div className="term-host" ref={hostRef} />;
+  const runFind = (text: string, prev = false) => {
+    setFindText(text);
+    if (!text) return;
+    if (prev) searchRef.current?.findPrevious(text);
+    else searchRef.current?.findNext(text);
+  };
+
+  const onFindKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      runFind(findText, e.shiftKey);
+    } else if (e.key === "Escape") {
+      setFindOpen(false);
+      setFindText("");
+      searchRef.current?.clearDecorations();
+      termRef.current?.focus();
+    }
+  };
+
+  return (
+    <div className="term-wrap">
+      {findOpen && (
+        <div className="term-find">
+          <input
+            autoFocus
+            placeholder="Find…"
+            value={findText}
+            onChange={(e) => runFind(e.target.value)}
+            onKeyDown={onFindKey}
+          />
+          <button title="Previous" onClick={() => runFind(findText, true)}>
+            ↑
+          </button>
+          <button title="Next" onClick={() => runFind(findText)}>
+            ↓
+          </button>
+          <button
+            title="Close"
+            onClick={() => {
+              setFindOpen(false);
+              setFindText("");
+              searchRef.current?.clearDecorations();
+              termRef.current?.focus();
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+      <div className="term-host" ref={hostRef} />
+    </div>
+  );
 }
