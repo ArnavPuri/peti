@@ -1,16 +1,68 @@
 //! The heart of Phase 0: one PTY per pane, a reader thread that streams output
 //! to the frontend as events, and explicit teardown so no child is orphaned.
 
+use std::collections::HashSet;
 use std::collections::HashMap;
 use std::io::{Read, Write};
-use std::sync::Mutex;
+use std::sync::{Mutex, OnceLock};
 use std::thread;
 
+use directories::BaseDirs;
 use portable_pty::{native_pty_system, Child, CommandBuilder, MasterPty, PtySize};
 use serde::Serialize;
 use tauri::{AppHandle, Emitter};
 
 pub type SessionId = String;
+
+/// GUI-launched macOS apps inherit only a minimal PATH, so a bare `claude`
+/// (in ~/.local/bin, homebrew, nvm, …) isn't found. Capture the user's login
+/// shell PATH once and use it for spawned panes.
+static LOGIN_PATH: OnceLock<Option<String>> = OnceLock::new();
+
+fn resolve_login_path() -> Option<String> {
+    let shell = std::env::var("SHELL").unwrap_or_else(|_| "/bin/zsh".to_string());
+    let script = "printf 'PETIPATH=%s\\n' \"$PATH\"";
+    for flag in ["-ilc", "-lc"] {
+        if let Ok(output) = std::process::Command::new(&shell).arg(flag).arg(script).output() {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            for line in stdout.lines() {
+                if let Some(p) = line.strip_prefix("PETIPATH=") {
+                    let p = p.trim();
+                    if !p.is_empty() {
+                        return Some(p.to_string());
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+/// PATH for spawned children: the login-shell PATH plus common user bins and the
+/// system defaults, de-duplicated in order. Belt-and-suspenders so `claude` is
+/// found regardless of how Peti itself was launched.
+fn build_child_path() -> String {
+    let mut candidates: Vec<String> = Vec::new();
+    if let Some(p) = LOGIN_PATH.get_or_init(resolve_login_path) {
+        candidates.extend(p.split(':').map(String::from));
+    }
+    if let Some(base) = BaseDirs::new() {
+        candidates.push(base.home_dir().join(".local/bin").to_string_lossy().into_owned());
+    }
+    candidates.push("/opt/homebrew/bin".to_string());
+    candidates.push("/usr/local/bin".to_string());
+    if let Ok(existing) = std::env::var("PATH") {
+        candidates.extend(existing.split(':').map(String::from));
+    }
+    candidates.extend(["/usr/bin", "/bin", "/usr/sbin", "/sbin"].map(String::from));
+
+    let mut seen = HashSet::new();
+    candidates
+        .into_iter()
+        .filter(|d| !d.is_empty() && seen.insert(d.clone()))
+        .collect::<Vec<_>>()
+        .join(":")
+}
 
 struct Session {
     master: Box<dyn MasterPty + Send>,
@@ -59,6 +111,9 @@ impl PtyManager {
         cmd.cwd(&cwd);
         // Claude's TUI keys off TERM for colour / capability detection.
         cmd.env("TERM", "xterm-256color");
+        // Ensure the user's real PATH so `claude` resolves even when Peti was
+        // launched from Finder/Dock (minimal PATH).
+        cmd.env("PATH", build_child_path());
 
         let child = pair.slave.spawn_command(cmd).map_err(|e| e.to_string())?;
         // Drop the slave handle so the master sees EOF once the child exits.
