@@ -1,86 +1,183 @@
-# Peti
+<div align="center">
 
-> **Pre-alpha — expect breakage.** This is a work-in-progress and not yet usable for daily work.
+# 📦 Peti
 
-**Peti** (Hindi for *box*) is a calm, one-click desktop home for the solo developer juggling many
-small projects. Each **workspace — a peti** — bundles its repos, its Claude Code session(s), a personal
-task list, and its own visual identity. It drives your existing `claude` CLI over a real PTY, so it runs
-on your own subscription auth — no API keys.
+**A calm desktop home for juggling many small projects with Claude Code.**
 
-See [`PRD.md`](./PRD.md) for the full product spec and phased plan.
+[![License: MIT](https://img.shields.io/badge/License-MIT-5CD6AE.svg)](./LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%20·%20Linux-555.svg)](#platform-support)
+[![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-24C8DB.svg)](https://tauri.app)
+[![Status: pre-alpha](https://img.shields.io/badge/status-pre--alpha-e5a13a.svg)](#status)
+
+</div>
+
+> **Pre-alpha — expect breakage.** It's usable day-to-day on macOS, but it's young, unsigned, and
+> moving fast. Back up nothing you can't lose.
+
+**Peti** (Hindi for *box*) gives each project its own self-contained window. Inside, its repos run as
+free-floating [Claude Code](https://docs.claude.com/en/docs/claude-code) terminals over a background
+you recognise — with a task note, a prompt bar, and at-a-glance status so you can tell, across many
+projects, which Claude is working and which one needs you.
+
+It drives **your existing `claude` CLI** over a real PTY, so it runs on your own subscription auth —
+**no API keys, no separate model config.**
+
+## Screenshots
+
+> _Drop a screenshot or short GIF at `docs/screenshot.png` and it'll render here._
+> <!-- ![Peti](docs/screenshot.png) -->
+
+## Features
+
+- 🪟 **One window per Peti** — open a project and you're *inside* it: 2–3 repos as draggable,
+  resizable, translucent terminal cards over a full-bleed background. No switcher, no clutter.
+- 🤖 **Real Claude Code, your auth** — each card is the actual `claude` CLI in its repo. Insert/Send
+  prompt modes, bracketed-paste so multi-line never mis-submits, and `resume` (`--continue`) panes.
+- 🟢 **Know who needs you** — per-card status badges (working / awaiting / idle) read from Claude's own
+  transcript, a **menubar count** of how many Claudes are waiting across *all* Petis, and a desktop
+  **notification + chime** when one finishes.
+- 🧰 **A dock for your cards** — a slim rail of every card; click to raise or reopen, and a **＋** to
+  spawn a new **Claude**, **shell**, or **code-viewer** card on the fly.
+- 📖 **Read-only code viewer** — a card kind that browses a repo and shows files with syntax
+  highlighting (not an editor — a calm place to glance at what Claude is touching).
+- ✅ **Task note + prompt bar** — a floating sticky note per Peti; click ▶ to inject a task into the
+  focused card. The bottom bar sends to the focused card; reusable **prompt snippets** included.
+- 🎨 **Make it yours** — per-Peti background (bundled wallpapers, gradient presets, or your own image,
+  swappable live), accent colour, and **light / dark / system** themes.
+- 🌿 **Git at a glance** — current branch + a dirty-dot in each card's title bar.
+- 🚀 **Per-Peti launchers** — generate a `<Name>.app` with its own icon, so a project is one click from
+  your Dock or Desktop (via the `peti://` URL scheme).
+- 🗂 **Fast setup** — scan a folder to turn its repos into cards; import/export a Peti as a TOML.
 
 ## Status
 
-| Phase | What | State |
-|---|---|---|
-| **0** | Terminal spike — PTY ↔ xterm round-trip running real `claude` | **done** |
-| **1** | Self-contained Peti shell — one window per Peti, free-floating Claude cards over a background | **done** |
-| **2** | Core loop — task note + prompt bar + send-to-Claude + resume | **done** |
-| **3** | Authoring & ship → v1 — in-app editor, settings, packaged builds | **done** (macOS) |
+| Area | State |
+|---|---|
+| Core: windows, cards, Claude panes, tasks, prompt bar, resume | ✅ |
+| Identity: backgrounds, wallpapers, themes, in-app editor | ✅ |
+| Awareness: status badges, tray count, notifications, dock | ✅ |
+| Extras: code viewer, snippets, git status, launchers, scan/import-export | ✅ |
+| macOS packaged build (`.app` / `.dmg`) | ✅ |
+| Code-signing / notarization, auto-update | ⛔ not yet |
+| Linux build (AppImage / `.deb`) | ⚙️ configured, **unverified** (no CI yet) |
+| Windows | 🚫 out of scope |
 
-Each **Peti** opens as its own window (chosen from a native menu) — no in-app switcher, no launcher.
-Inside, its repos run as draggable, resizable, translucent terminal cards over a recognisable
-background, with a floating task note and a prompt bar. See [`PRD.md`](./PRD.md) for the full
-architecture and phased plan.
+See [`PRD.md`](./PRD.md) for the full architecture and the phased plan.
 
-**Beyond v1 (shipped):** live session status (per-card working/awaiting badges) with desktop
-notifications + chime · in-Peti background switcher with gradient presets · light/dark/system themes ·
-prompt snippets · terminal copy/paste/find/clear/font-size · git branch + dirty status per card ·
-folder scan + import/export for fast Peti creation.
+## Install
 
-**Remaining for public release:** CI for the Linux AppImage/`.deb`, README screenshots, and a
-name-availability check.
+There are no published releases yet — **build from source** (below). Once there are:
 
-## Stack
+- Download the `.dmg`, drag **Peti.app** to `/Applications`.
+- Builds are **unsigned**, so the first launch: **right-click Peti.app → Open → Open** (once). After
+  that it opens normally.
+- Launch it once so macOS registers the `peti://` scheme (needed by the per-Peti launchers).
 
-Tauri 2 (Rust) · React + TypeScript · xterm.js · `portable-pty` · Vite · Bun.
+## Build from source
 
-## Prerequisites
+**Prerequisites**
 
-- [Rust](https://rustup.rs/) (stable) + the platform's Tauri system deps — see
+- [Rust](https://rustup.rs/) (stable) + your platform's Tauri system deps —
   [tauri.app/start/prerequisites](https://tauri.app/start/prerequisites/)
 - [Bun](https://bun.sh/)
 - The [`claude` CLI](https://docs.claude.com/en/docs/claude-code) on your `PATH`, already logged in
-
-## Develop
+- *(optional)* [ImageMagick](https://imagemagick.org/) — only for generating per-Peti launcher icons
 
 ```sh
+git clone https://github.com/arnavpuri/peti.git
+cd peti
 bun install
-bun run tauri dev
+
+bun run tauri dev      # run in dev
+bun run tauri build    # package: .app + .dmg on macOS, AppImage + .deb on Linux
 ```
 
-On first launch Peti opens your first Peti window (or a "create one" prompt if you have none).
+Bundles land in `src-tauri/target/release/bundle/`.
 
 ## Using it
 
-Everything is driven from the native **Peti** menu:
+Everything is driven from the **File** menu:
 
-- **New Peti…** — opens the editor: name it, pick an accent + background image, add panes (each a repo
-  folder running `claude` or a shell, with optional `resume`). Save drops you straight into the new
-  Peti's window.
-- **Open ▸** — open any Peti in its own window. Multiple Petis can be open at once; each is fully
-  self-contained (no switcher).
-- **Edit ▸** — change a Peti or delete it.
-- **Settings…** — default send mode, and a default `--model` / `--permission-mode` applied to claude
-  panes that don't set their own.
+- **New Peti…** (`⌘N`) — the editor: name it, pick an accent + background, add panes (a repo folder
+  running `claude`, a `shell`, or a read-only `code` viewer; optional `resume`). You can **scan a
+  folder** to add its repos in one click, or **import** a Peti TOML.
+- **Open Peti ▸** — open any Peti in its own window (several can be open at once).
+- **Edit Peti ▸** — change/delete a Peti, **export** it, or **🚀 Create launcher…**.
+- **Settings…** (`⌘,`) — default send mode, theme, alerts, and a default `--model` /
+  `--permission-mode` for claude panes that don't set their own.
 
-Inside a Peti: drag cards by their title bar, resize from the corner; the floating note holds your
-tasks (click ▶ to inject one into the focused card); the bottom bar sends prompts to the focused card
-(Enter sends, Shift+Enter for a newline; toggle Insert/Send). Positions, tasks, and layout persist.
+**Inside a Peti:** drag a card by its title bar, resize from the corner. The **dock** (top) lists every
+card — click to raise, **＋** to add one. The floating **note** holds tasks (▶ injects into the focused
+card). The **prompt bar** (bottom) sends to the focused card. The **🖼** button (bottom-left) swaps the
+background. Positions, tasks, layout, and background persist per Peti.
 
-Workspaces live as TOML under your config dir (`~/Library/Application Support/com.arnavpuri.peti/`
-on macOS, `~/.config/peti/` on Linux); the editor writes them for you, but they're hand-editable too.
+### Keyboard shortcuts
 
-## Build
+| Shortcut | Action |
+|---|---|
+| `⌘N` / `⌘,` | New Peti / Settings |
+| `⌘W` / `⌘Q` | Close window / Quit |
+| `Enter` / `Shift+Enter` | Prompt bar: send / newline |
+| `⌘C` / `⌘V` | Card terminal: copy selection / paste |
+| `⌘F` / `⌘K` | Card terminal: find / clear |
+| `⌘+` `⌘-` `⌘0` | Card terminal: font size |
 
-```sh
-bun run tauri build
+## Configuration
+
+Workspaces are plain files under your config directory — the editor writes them, but they're
+hand-editable too:
+
+- macOS: `~/Library/Application Support/com.arnavpuri.peti/`
+- Linux: `~/.config/peti/`
+
+```
+<config>/
+├─ workspaces/<id>.toml          # human-authored: panes, accent, background
+├─ workspaces/<id>.layout.json   # app-managed: card geometry + live background
+├─ workspaces/<id>.tasks.json    # app-managed: the task note
+├─ registry.json                 # pointers to in-repo .peti/workspace.toml files
+├─ settings.json                 # theme, send mode, model, alerts
+└─ snippets.json                 # reusable prompts
 ```
 
-On macOS this produces `Peti.app` and a `.dmg` under `src-tauri/target/release/bundle/`. On Linux it
-produces an AppImage and `.deb` (build on a Linux host — there's no cross-compile). Windows is out of
-scope for v1. Builds are unsigned (pre-alpha).
+A workspace TOML:
+
+```toml
+[workspace]
+id         = "chanakya"
+name       = "Chanakya AI"
+background  = "wallpaper:paduret"   # bundled wallpaper, "preset:dusk", an image path, or omit
+accent     = "#5CD6AE"
+
+[[pane]]
+label   = "api"
+path    = "~/dev/chanakya/api"
+type    = "claude"        # "claude" | "shell" | "code"
+resume  = true            # spawn with `claude --continue`
+
+[[pane]]
+label = "web"
+path  = "~/dev/chanakya/web"
+type  = "code"            # read-only file viewer
+```
+
+## Architecture
+
+Tauri 2 (Rust) backend · React + TypeScript frontend · xterm.js · `portable-pty` · Vite · Bun. One
+backend process serves every Peti window; each window loads exactly one workspace. Pane status is
+inferred from Claude's `~/.claude/projects/*.jsonl` transcripts — never by scraping the terminal. See
+[`PRD.md`](./PRD.md) for the full design.
+
+## Contributing
+
+It's early and the shape is still moving, but issues and PRs are welcome — see
+[`CONTRIBUTING.md`](./CONTRIBUTING.md). Good first areas: Linux verification + CI, signing/notarization,
+and code-viewer polish.
 
 ## License
 
 [MIT](./LICENSE) © 2026 Arnav Puri
+
+Built on the excellent [Tauri](https://tauri.app), [xterm.js](https://xtermjs.org), and
+[wezterm's portable-pty](https://github.com/wez/wezterm/tree/main/pty). Peti only ever drives the real
+`claude` binary — it is not affiliated with Anthropic.
