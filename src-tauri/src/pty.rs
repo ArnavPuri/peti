@@ -40,8 +40,9 @@ fn resolve_login_path() -> Option<String> {
 
 /// PATH for spawned children: the login-shell PATH plus common user bins and the
 /// system defaults, de-duplicated in order. Belt-and-suspenders so `claude` is
-/// found regardless of how Peti itself was launched.
-fn build_child_path() -> String {
+/// found regardless of how Peti itself was launched. Also applied process-wide
+/// at startup so tools Peti shells out to (magick, iconutil, git) resolve.
+pub fn build_child_path() -> String {
     let mut candidates: Vec<String> = Vec::new();
     if let Some(p) = LOGIN_PATH.get_or_init(resolve_login_path) {
         candidates.extend(p.split(':').map(String::from));

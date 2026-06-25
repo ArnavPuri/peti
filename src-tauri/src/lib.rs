@@ -54,6 +54,11 @@ pub fn run() {
         .manage(PtyManager::default())
         .manage(StatusManager::default())
         .setup(|app| {
+            // GUI launches give a minimal PATH; widen it process-wide so both
+            // spawned panes and tools we shell out to (magick/iconutil/git)
+            // resolve like they would in the user's terminal.
+            std::env::set_var("PATH", pty::build_child_path());
+
             let _ = config::ensure_dirs();
             let handle = app.handle();
 
