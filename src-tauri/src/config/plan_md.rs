@@ -168,4 +168,44 @@ mod tests {
 
         let _ = fs::remove_dir_all(&dir);
     }
+
+    fn pane(path: &std::path::Path, pane_type: super::PaneType) -> super::PaneDef {
+        super::PaneDef {
+            label: "p".to_string(),
+            path: path.to_string_lossy().into_owned(),
+            pane_type,
+            command: None,
+            resume: false,
+            rect: None,
+        }
+    }
+
+    #[test]
+    fn sync_writes_only_to_distinct_claude_dirs() {
+        let root = std::env::temp_dir().join(format!("peti-sync-test-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        let claude_dir = root.join("api");
+        let shell_dir = root.join("scripts");
+        fs::create_dir_all(&claude_dir).unwrap();
+        fs::create_dir_all(&shell_dir).unwrap();
+
+        let plan = Plan {
+            description: String::new(),
+            tasks: vec![t("do it", 1, false, false, &[])],
+        };
+        // Two Claude panes share `claude_dir` (dedup) + one Shell pane (skipped).
+        let panes = vec![
+            pane(&claude_dir, super::PaneType::Claude),
+            pane(&claude_dir, super::PaneType::Claude),
+            pane(&shell_dir, super::PaneType::Shell),
+        ];
+        sync("Peti", &panes, &plan);
+
+        let written = fs::read_to_string(claude_dir.join(".peti").join("PLAN.md")).unwrap();
+        assert!(written.contains("- [ ] (P1) do it"));
+        // Shell-pane dir gets no PLAN.md.
+        assert!(!shell_dir.join(".peti").exists());
+
+        let _ = fs::remove_dir_all(&root);
+    }
 }
