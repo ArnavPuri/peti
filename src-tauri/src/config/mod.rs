@@ -7,6 +7,7 @@ use std::path::PathBuf;
 
 use directories::{BaseDirs, ProjectDirs};
 
+pub mod plan_md;
 pub mod scan;
 pub mod settings;
 pub mod snippets;

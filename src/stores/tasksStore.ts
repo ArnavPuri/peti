@@ -1,35 +1,53 @@
 import { create } from "zustand";
-import { listTasks, saveTasks, type Task } from "../lib/ipc";
+import { getPlan, savePlan, syncPlanMd, type Task } from "../lib/ipc";
 
 interface TasksState {
   workspaceId: string | null;
+  description: string;
   tasks: Task[];
   load: (id: string) => Promise<void>;
+  setDescription: (text: string) => void;
   add: (text: string) => void;
   toggle: (taskId: string) => void;
   setText: (taskId: string, text: string) => void;
   remove: (taskId: string) => void;
   move: (taskId: string, dir: -1 | 1) => void;
+  setPriority: (taskId: string, priority: number) => void;
+  toggleNextUp: (taskId: string) => void;
+  addLabel: (taskId: string, label: string) => void;
+  removeLabel: (taskId: string, label: string) => void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 
-// Re-number `order` to match array position and persist (debounced).
-function persist(workspaceId: string | null, tasks: Task[]) {
+// Re-number `order` to match array position, persist the plan, then mirror it
+// to each Claude pane's PLAN.md (debounced).
+function persist(workspaceId: string | null, description: string, tasks: Task[]) {
   if (!workspaceId) return;
   const ordered = tasks.map((t, i) => ({ ...t, order: i }));
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => void saveTasks(workspaceId, ordered), 350);
+  saveTimer = setTimeout(() => {
+    void savePlan(workspaceId, { description, tasks: ordered })
+      .then(() => syncPlanMd(workspaceId))
+      .catch((e) => console.error("plan save/sync failed", e));
+  }, 350);
 }
 
 export const useTasksStore = create<TasksState>((set) => ({
   workspaceId: null,
+  description: "",
   tasks: [],
 
   load: async (id) => {
-    const tasks = await listTasks(id);
-    set({ workspaceId: id, tasks });
+    const plan = await getPlan(id);
+    set({ workspaceId: id, description: plan.description, tasks: plan.tasks });
   },
+
+  setDescription: (text) =>
+    set((s) => {
+      persist(s.workspaceId, text, s.tasks);
+      return { description: text };
+    }),
 
   add: (text) => {
     const trimmed = text.trim();
@@ -37,9 +55,17 @@ export const useTasksStore = create<TasksState>((set) => ({
     set((s) => {
       const tasks = [
         ...s.tasks,
-        { id: crypto.randomUUID(), text: trimmed, done: false, order: s.tasks.length },
+        {
+          id: crypto.randomUUID(),
+          text: trimmed,
+          done: false,
+          order: s.tasks.length,
+          priority: 2,
+          labels: [],
+          nextUp: false,
+        },
       ];
-      persist(s.workspaceId, tasks);
+      persist(s.workspaceId, s.description, tasks);
       return { tasks };
     });
   },
@@ -47,21 +73,21 @@ export const useTasksStore = create<TasksState>((set) => ({
   toggle: (taskId) =>
     set((s) => {
       const tasks = s.tasks.map((t) => (t.id === taskId ? { ...t, done: !t.done } : t));
-      persist(s.workspaceId, tasks);
+      persist(s.workspaceId, s.description, tasks);
       return { tasks };
     }),
 
   setText: (taskId, text) =>
     set((s) => {
       const tasks = s.tasks.map((t) => (t.id === taskId ? { ...t, text } : t));
-      persist(s.workspaceId, tasks);
+      persist(s.workspaceId, s.description, tasks);
       return { tasks };
     }),
 
   remove: (taskId) =>
     set((s) => {
       const tasks = s.tasks.filter((t) => t.id !== taskId);
-      persist(s.workspaceId, tasks);
+      persist(s.workspaceId, s.description, tasks);
       return { tasks };
     }),
 
@@ -72,7 +98,46 @@ export const useTasksStore = create<TasksState>((set) => ({
       if (i < 0 || j < 0 || j >= s.tasks.length) return s;
       const tasks = [...s.tasks];
       [tasks[i], tasks[j]] = [tasks[j], tasks[i]];
-      persist(s.workspaceId, tasks);
+      persist(s.workspaceId, s.description, tasks);
+      return { tasks };
+    }),
+
+  setPriority: (taskId, priority) =>
+    set((s) => {
+      const tasks = s.tasks.map((t) => (t.id === taskId ? { ...t, priority } : t));
+      persist(s.workspaceId, s.description, tasks);
+      return { tasks };
+    }),
+
+  toggleNextUp: (taskId) =>
+    set((s) => {
+      const tasks = s.tasks.map((t) =>
+        t.id === taskId ? { ...t, nextUp: !t.nextUp } : t,
+      );
+      persist(s.workspaceId, s.description, tasks);
+      return { tasks };
+    }),
+
+  addLabel: (taskId, label) => {
+    const tag = label.trim();
+    if (!tag) return;
+    set((s) => {
+      const tasks = s.tasks.map((t) =>
+        t.id === taskId && !t.labels.includes(tag)
+          ? { ...t, labels: [...t.labels, tag] }
+          : t,
+      );
+      persist(s.workspaceId, s.description, tasks);
+      return { tasks };
+    });
+  },
+
+  removeLabel: (taskId, label) =>
+    set((s) => {
+      const tasks = s.tasks.map((t) =>
+        t.id === taskId ? { ...t, labels: t.labels.filter((l) => l !== label) } : t,
+      );
+      persist(s.workspaceId, s.description, tasks);
       return { tasks };
     }),
 }));
