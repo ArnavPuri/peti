@@ -464,6 +464,7 @@ body {
 .note-item {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   padding: 2px 4px;
   border-radius: 5px;
