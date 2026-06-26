@@ -298,7 +298,7 @@ select:focus-visible {
 }
 
 .field-check span {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--text-soft);
 }
 
@@ -509,7 +509,7 @@ select:focus-visible {
   position: sticky;
   bottom: 0;
   padding: 4px 12px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--status-working);
   background: #0d1117;
 }
@@ -1259,12 +1259,12 @@ select:focus-visible {
 
 .editor-error {
   color: var(--danger);
-  font-size: 12px;
+  font-size: var(--fs-sm);
 }
 
 .editor-notice {
   color: var(--accent);
-  font-size: 12px;
+  font-size: var(--fs-sm);
   word-break: break-all;
 }
 
@@ -1390,7 +1390,7 @@ select:focus-visible {
   gap: 8px;
   padding: 4px 6px;
   border-radius: var(--r-ctrl);
-  font-size: 12px;
+  font-size: var(--fs-sm);
 }
 
 .scan-row:hover {
