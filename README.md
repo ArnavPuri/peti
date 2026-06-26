@@ -40,8 +40,11 @@ It drives **your existing `claude` CLI** over a real PTY, so it runs on your own
   spawn a new **Claude**, **shell**, or **code-viewer** card on the fly.
 - 📖 **Read-only code viewer** — a card kind that browses a repo and shows files with syntax
   highlighting (not an editor — a calm place to glance at what Claude is touching).
-- ✅ **Task note + prompt bar** — a floating sticky note per Peti; click ▶ to inject a task into the
-  focused card. The bottom bar sends to the focused card; reusable **prompt snippets** included.
+- ✅ **Plan note + prompt bar** — a floating note per Peti with a project **description** and tasks that
+  carry a **priority (P1–P3)**, **labels**, and a pinned **Next up**. Peti mirrors the plan one-way into
+  `.peti/PLAN.md` inside each Claude pane's repo (auto-gitignored) so Claude can read what to work on
+  next. Click ▶ to inject a task into the focused card; the bottom bar sends to it; reusable **prompt
+  snippets** included.
 - 🎨 **Make it yours** — per-Peti background (bundled wallpapers, gradient presets, or your own image,
   swappable live), accent colour, and **light / dark / system** themes.
 - 🌿 **Git at a glance** — current branch + a dirty-dot in each card's title bar.
@@ -53,7 +56,7 @@ It drives **your existing `claude` CLI** over a real PTY, so it runs on your own
 
 | Area | State |
 |---|---|
-| Core: windows, cards, Claude panes, tasks, prompt bar, resume | ✅ |
+| Core: windows, cards, Claude panes, planning + `PLAN.md` sync, prompt bar, resume | ✅ |
 | Identity: backgrounds, wallpapers, themes, in-app editor | ✅ |
 | Awareness: status badges, tray count, notifications, dock | ✅ |
 | Extras: code viewer, snippets, git status, launchers, scan/import-export | ✅ |
@@ -107,9 +110,11 @@ Everything is driven from the **File** menu:
   `--permission-mode` for claude panes that don't set their own.
 
 **Inside a Peti:** drag a card by its title bar, resize from the corner. The **dock** (top) lists every
-card — click to raise, **＋** to add one. The floating **note** holds tasks (▶ injects into the focused
-card). The **prompt bar** (bottom) sends to the focused card. The **🖼** button (bottom-left) swaps the
-background. Positions, tasks, layout, and background persist per Peti.
+card — click to raise, **＋** to add one. The floating **note** holds the project **description** and
+tasks — set a **priority**, add **labels**, and **★ pin** the immediate ones to **Next up**; ▶ injects a
+task into the focused card. Peti mirrors the plan to `<repo>/.peti/PLAN.md` (auto-gitignored) so a Claude
+pane can read what's next. The **prompt bar** (bottom) sends to the focused card. The **🖼** button
+(bottom-left) swaps the background. Positions, plan, layout, and background persist per Peti.
 
 ### Keyboard shortcuts
 
@@ -134,11 +139,15 @@ hand-editable too:
 <config>/
 ├─ workspaces/<id>.toml          # human-authored: panes, accent, background
 ├─ workspaces/<id>.layout.json   # app-managed: card geometry + live background
-├─ workspaces/<id>.tasks.json    # app-managed: the task note
+├─ workspaces/<id>.tasks.json    # app-managed: the plan (description + prioritized tasks)
 ├─ registry.json                 # pointers to in-repo .peti/workspace.toml files
 ├─ settings.json                 # theme, send mode, model, alerts
 └─ snippets.json                 # reusable prompts
 ```
+
+Each Claude pane's repo also gets a generated **`<repo>/.peti/PLAN.md`** — a one-way mirror of that
+Peti's plan (description + tasks, with a `## Next up` section), rewritten on every edit so a Claude
+session can read what's next. `.peti/` is added to the repo's `.gitignore` automatically.
 
 A workspace TOML:
 
