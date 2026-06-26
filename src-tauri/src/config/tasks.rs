@@ -70,7 +70,9 @@ pub fn list_tasks(id: &str) -> Vec<Task> {
 }
 
 pub fn save_tasks(id: &str, tasks: Vec<Task>) -> Result<(), String> {
-    save_plan(id, Plan { description: String::new(), tasks })
+    let mut plan = load_plan(id);
+    plan.tasks = tasks;
+    save_plan(id, plan)
 }
 
 #[cfg(test)]
