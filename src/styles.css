@@ -126,6 +126,41 @@ body {
   overflow: hidden;
 }
 
+/* ---- Shared component primitives ---- */
+
+/* Shared 22px square icon button — apply alongside existing button classes. */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-ctrl);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.icon-btn:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.icon-btn:active {
+  background: var(--hover-soft);
+}
+
+/* Shared focus ring for text inputs / textareas / selects. */
+.input-base:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
 /* ---- Peti shell ---- */
 
 .peti {
