@@ -27,9 +27,9 @@ function persist(workspaceId: string | null, description: string, tasks: Task[])
   const ordered = tasks.map((t, i) => ({ ...t, order: i }));
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    void savePlan(workspaceId, { description, tasks: ordered }).then(() =>
-      syncPlanMd(workspaceId),
-    );
+    void savePlan(workspaceId, { description, tasks: ordered })
+      .then(() => syncPlanMd(workspaceId))
+      .catch((e) => console.error("plan save/sync failed", e));
   }, 350);
 }
 

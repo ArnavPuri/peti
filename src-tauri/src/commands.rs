@@ -84,7 +84,9 @@ pub fn save_plan(id: String, plan: tasks::Plan) -> Result<(), String> {
 pub fn sync_plan_md(id: String) -> Result<(), String> {
     let ws = ws::get_workspace(&id)?;
     let plan = tasks::load_plan(&id);
-    crate::config::plan_md::sync(&ws.name, &ws.panes, &plan);
+    for err in crate::config::plan_md::sync(&ws.name, &ws.panes, &plan) {
+        eprintln!("sync_plan_md: failed to write PLAN.md: {err}");
+    }
     Ok(())
 }
 

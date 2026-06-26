@@ -83,9 +83,11 @@ fn write_to_dir(dir: &Path, name: &str, plan: &Plan) -> Result<(), String> {
 }
 
 /// Write PLAN.md into each distinct Claude-pane directory. Best-effort: a
-/// failure on one directory does not block the others.
-pub fn sync(name: &str, panes: &[PaneDef], plan: &Plan) {
+/// failure on one directory does not block the others. Returns the list of
+/// per-directory error messages (empty on full success).
+pub fn sync(name: &str, panes: &[PaneDef], plan: &Plan) -> Vec<String> {
     let mut seen = HashSet::new();
+    let mut errors = Vec::new();
     for pane in panes {
         if pane.pane_type != PaneType::Claude {
             continue;
@@ -94,8 +96,11 @@ pub fn sync(name: &str, panes: &[PaneDef], plan: &Plan) {
         if !seen.insert(dir.clone()) {
             continue;
         }
-        let _ = write_to_dir(&dir, name, plan);
+        if let Err(e) = write_to_dir(&dir, name, plan) {
+            errors.push(format!("{}: {e}", dir.display()));
+        }
     }
+    errors
 }
 
 #[cfg(test)]
@@ -199,7 +204,8 @@ mod tests {
             pane(&claude_dir, super::PaneType::Claude),
             pane(&shell_dir, super::PaneType::Shell),
         ];
-        sync("Peti", &panes, &plan);
+        let errors = sync("Peti", &panes, &plan);
+        assert!(errors.is_empty(), "unexpected sync errors: {errors:?}");
 
         let written = fs::read_to_string(claude_dir.join(".peti").join("PLAN.md")).unwrap();
         assert!(written.contains("- [ ] (P1) do it"));
