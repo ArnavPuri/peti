@@ -68,7 +68,7 @@ export default function PromptBar({ workspace }: { workspace: Workspace }) {
                   <button className="snips-use" title={s.text} onClick={() => insertSnippet(s.text)}>
                     {s.title}
                   </button>
-                  <button className="snips-del" title="Delete" onClick={() => removeSnippet(s.id)}>
+                  <button className="snips-del icon-btn" title="Delete" onClick={() => removeSnippet(s.id)}>
                     ×
                   </button>
                 </div>

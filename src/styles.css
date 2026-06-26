@@ -856,14 +856,14 @@ select:focus-visible {
 .bgswitch-btn {
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: var(--r-surface);
   border: 1px solid var(--border);
   background: var(--glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(var(--blur-2));
+  -webkit-backdrop-filter: blur(var(--blur-2));
   font-size: 15px;
   cursor: pointer;
-  box-shadow: 0 8px 28px var(--shadow);
+  box-shadow: var(--elev-2);
 }
 
 .bgswitch-btn:hover {
@@ -876,16 +876,16 @@ select:focus-visible {
   left: 0;
   width: 224px;
   padding: 10px;
-  border-radius: 12px;
+  border-radius: var(--r-surface);
   border: 1px solid var(--border);
   background: var(--glass-strong);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 12px 40px var(--shadow);
+  backdrop-filter: blur(var(--blur-3));
+  -webkit-backdrop-filter: blur(var(--blur-3));
+  box-shadow: var(--elev-3);
 }
 
 .bgswitch-section {
-  font-size: 10px;
+  font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-dim);
@@ -899,12 +899,12 @@ select:focus-visible {
 .bgswitch-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .bgswitch-swatch {
   height: 38px;
-  border-radius: 7px;
+  border-radius: var(--r-chip);
   border: 1px solid var(--border);
   cursor: pointer;
   padding: 0;
@@ -924,7 +924,7 @@ select:focus-visible {
   width: 100%;
   margin-top: 8px;
   padding: 7px;
-  border-radius: 8px;
+  border-radius: var(--r-chip);
   border: 1px solid var(--border);
   background: var(--hover-soft);
   color: var(--text-soft);
@@ -948,25 +948,25 @@ select:focus-visible {
   width: min(680px, 80%);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-3);
   padding: 6px 8px 6px 6px;
-  border-radius: 12px;
+  border-radius: var(--r-surface);
   border: 1px solid var(--border);
   background: var(--glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 10px 36px var(--shadow);
+  backdrop-filter: blur(var(--blur-2));
+  -webkit-backdrop-filter: blur(var(--blur-2));
+  box-shadow: var(--elev-2);
 }
 
 .promptbar-mode {
   flex-shrink: 0;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: var(--r-ctrl);
   border: 1px solid var(--border);
   background: var(--hover-soft);
   color: var(--text-soft);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   cursor: pointer;
 }
 
@@ -982,7 +982,7 @@ select:focus-visible {
   border: none;
   color: var(--text);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-md);
   line-height: 1.4;
   padding: 6px 2px;
 }
@@ -1009,12 +1009,12 @@ select:focus-visible {
   left: 0;
   width: 280px;
   padding: 6px;
-  border-radius: 10px;
+  border-radius: var(--r-surface);
   border: 1px solid var(--border);
   background: var(--glass-strong);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 12px 40px var(--shadow);
+  backdrop-filter: blur(var(--blur-3));
+  -webkit-backdrop-filter: blur(var(--blur-3));
+  box-shadow: var(--elev-3);
 }
 
 .snips-list {
@@ -1040,7 +1040,7 @@ select:focus-visible {
   border: none;
   color: var(--text-soft);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   padding: 6px 8px;
   cursor: pointer;
   overflow: hidden;
@@ -1053,7 +1053,7 @@ select:focus-visible {
   width: 22px;
   height: 22px;
   border: none;
-  border-radius: 5px;
+  border-radius: var(--r-ctrl);
   background: transparent;
   color: var(--text-muted);
   font-size: 14px;
@@ -1075,12 +1075,12 @@ select:focus-visible {
   width: 100%;
   margin-top: 6px;
   padding: 7px;
-  border-radius: 7px;
+  border-radius: var(--r-ctrl);
   border: 1px solid var(--border);
   background: var(--hover-soft);
   color: var(--text-soft);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   cursor: pointer;
 }
 
