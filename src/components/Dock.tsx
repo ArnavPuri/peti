@@ -38,7 +38,7 @@ export default function Dock({ cards, onRaise, onClose, onAdd }: Props) {
             <span className="dock-label">{c.label}</span>
           </button>
           {!c.closed && (
-            <button className="dock-close" title="Close" onClick={() => onClose(c.sid)}>
+            <button className="dock-close icon-btn" title="Close" onClick={() => onClose(c.sid)}>
               ×
             </button>
           )}
@@ -46,7 +46,7 @@ export default function Dock({ cards, onRaise, onClose, onAdd }: Props) {
       ))}
 
       <div className="dock-add-wrap">
-        <button className="dock-add" title="Add a card" onClick={() => setAddOpen((o) => !o)}>
+        <button className="dock-add icon-btn" title="Add a card" onClick={() => setAddOpen((o) => !o)}>
           ＋
         </button>
         {addOpen && (

@@ -752,21 +752,22 @@ select:focus-visible {
   max-width: 86%;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 11px;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--r-surface);
   border: 1px solid var(--border);
   background: var(--glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 8px 28px var(--shadow);
+  backdrop-filter: blur(var(--blur-2));
+  -webkit-backdrop-filter: blur(var(--blur-2));
+  box-shadow: var(--elev-2);
   overflow: visible;
 }
 
 .dock-chip {
   display: flex;
   align-items: center;
-  border-radius: 7px;
+  gap: var(--space-2);
+  border-radius: var(--r-chip);
   background: var(--hover-soft);
 }
 
@@ -777,13 +778,14 @@ select:focus-visible {
 .dock-raise {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   max-width: 160px;
   background: transparent;
   border: none;
   color: var(--text-soft);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
+  font-weight: 500;
   padding: 5px 8px;
   cursor: pointer;
 }
@@ -804,19 +806,7 @@ select:focus-visible {
 
 .dock-close {
   flex-shrink: 0;
-  width: 18px;
-  height: 22px;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
   font-size: 13px;
-  cursor: pointer;
-  border-radius: 0 7px 7px 0;
-}
-
-.dock-close:hover {
-  background: var(--hover);
-  color: var(--text);
 }
 
 .dock-add-wrap {
@@ -824,18 +814,9 @@ select:focus-visible {
 }
 
 .dock-add {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  border: none;
   background: var(--hover-soft);
   color: var(--text-soft);
   font-size: 14px;
-  cursor: pointer;
-}
-
-.dock-add:hover {
-  background: var(--hover);
 }
 
 .dock-add-pop {
@@ -846,12 +827,12 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   padding: 4px;
-  border-radius: 10px;
+  border-radius: var(--r-surface);
   border: 1px solid var(--border);
   background: var(--glass-strong);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 12px 40px var(--shadow);
+  backdrop-filter: blur(var(--blur-3));
+  -webkit-backdrop-filter: blur(var(--blur-3));
+  box-shadow: var(--elev-3);
 }
 
 .dock-add-pop button {
@@ -860,9 +841,9 @@ select:focus-visible {
   border: none;
   color: var(--text-soft);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   padding: 7px 9px;
-  border-radius: 6px;
+  border-radius: var(--r-ctrl);
   cursor: pointer;
 }
 
