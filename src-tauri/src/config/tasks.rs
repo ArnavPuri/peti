@@ -65,16 +65,6 @@ pub fn save_plan(id: &str, plan: Plan) -> Result<(), String> {
     fs::write(tasks_path(id)?, json).map_err(|e| e.to_string())
 }
 
-pub fn list_tasks(id: &str) -> Vec<Task> {
-    load_plan(id).tasks
-}
-
-pub fn save_tasks(id: &str, tasks: Vec<Task>) -> Result<(), String> {
-    let mut plan = load_plan(id);
-    plan.tasks = tasks;
-    save_plan(id, plan)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

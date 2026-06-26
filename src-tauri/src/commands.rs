@@ -1,7 +1,7 @@
 use tauri::{AppHandle, State};
 
 use crate::config::settings::{self, AppSettings};
-use crate::config::tasks::{self, Task};
+use crate::config::tasks;
 use crate::config::workspace as ws;
 use crate::pty::PtyManager;
 use crate::status::StatusManager;
@@ -71,13 +71,21 @@ pub fn create_launcher(id: String, dest_dir: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn list_tasks(id: String) -> Vec<Task> {
-    tasks::list_tasks(&id)
+pub fn get_plan(id: String) -> tasks::Plan {
+    tasks::load_plan(&id)
 }
 
 #[tauri::command]
-pub fn save_tasks(id: String, tasks: Vec<Task>) -> Result<(), String> {
-    crate::config::tasks::save_tasks(&id, tasks)
+pub fn save_plan(id: String, plan: tasks::Plan) -> Result<(), String> {
+    tasks::save_plan(&id, plan)
+}
+
+#[tauri::command]
+pub fn sync_plan_md(id: String) -> Result<(), String> {
+    let ws = ws::get_workspace(&id)?;
+    let plan = tasks::load_plan(&id);
+    crate::config::plan_md::sync(&ws.name, &ws.panes, &plan);
+    Ok(())
 }
 
 #[tauri::command]
