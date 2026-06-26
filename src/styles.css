@@ -202,9 +202,9 @@ select:focus-visible {
   margin: 4px 0;
   padding: 9px 18px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--r-chip);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-md);
   cursor: pointer;
 }
 
@@ -339,7 +339,7 @@ select:focus-visible {
 
 .pane-card-close {
   flex-shrink: 0;
-  font-size: 15px;
+  font-size: var(--fs-lg);
   line-height: 1;
 }
 
@@ -371,7 +371,7 @@ select:focus-visible {
   align-items: center;
   gap: 2px;
   padding: 4px;
-  border-radius: 8px;
+  border-radius: var(--r-chip);
   border: 1px solid var(--border);
   background: var(--glass-strong);
   box-shadow: 0 6px 20px var(--shadow);
@@ -383,7 +383,7 @@ select:focus-visible {
   border: none;
   color: var(--text);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   padding: 3px 5px;
 }
 
@@ -398,11 +398,12 @@ select:focus-visible {
   place-items: center;
   padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--r-ctrl);
   background: transparent;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--fs-sm);
   cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
 }
 
 .term-find button:hover {
@@ -427,7 +428,7 @@ select:focus-visible {
   display: flex;
   height: 100%;
   background: #0d1117;
-  border-radius: 6px;
+  border-radius: var(--r-ctrl);
   overflow: hidden;
 }
 
@@ -439,7 +440,7 @@ select:focus-visible {
   padding: 4px 0;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-sm);
 }
 
 .cv-row {
@@ -451,6 +452,7 @@ select:focus-visible {
   color: #c8ccd2;
   font-family: var(--font-mono);
   white-space: nowrap;
+  transition: background var(--t-fast);
 }
 
 .cv-row:hover {
@@ -467,7 +469,7 @@ select:focus-visible {
   flex-shrink: 0;
   text-align: center;
   color: #6b7480;
-  font-size: 9px;
+  font-size: var(--fs-xs);
 }
 
 .cv-name {
@@ -485,14 +487,14 @@ select:focus-visible {
 .cv-empty {
   padding: 16px;
   color: #6b7480;
-  font-size: 12px;
+  font-size: var(--fs-sm);
 }
 
 .cv-pre {
   margin: 0;
   padding: 10px 12px;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-sm);
   line-height: 1.5;
 }
 
@@ -570,7 +572,7 @@ select:focus-visible {
 .note-text:focus {
   outline: none;
   background: var(--hover);
-  border-radius: 4px;
+  border-radius: var(--r-ctrl);
 }
 
 .note-actions {
@@ -718,6 +720,7 @@ select:focus-visible {
   width: 48px;
   background: transparent;
   border: none;
+  border-radius: var(--r-chip);
   color: var(--text);
   font: inherit;
   font-size: var(--fs-xs);
@@ -803,7 +806,7 @@ select:focus-visible {
 .dock-add {
   background: var(--hover-soft);
   color: var(--text-soft);
-  font-size: 14px;
+  font-size: var(--fs-lg);
 }
 
 .dock-add-pop {
@@ -832,6 +835,7 @@ select:focus-visible {
   padding: 7px 9px;
   border-radius: var(--r-ctrl);
   cursor: pointer;
+  transition: background var(--t-fast);
 }
 
 .dock-add-pop button:hover {
@@ -861,9 +865,10 @@ select:focus-visible {
   background: var(--glass);
   backdrop-filter: blur(var(--blur-2));
   -webkit-backdrop-filter: blur(var(--blur-2));
-  font-size: 15px;
+  font-size: var(--fs-lg);
   cursor: pointer;
   box-shadow: var(--elev-2);
+  transition: background var(--t-fast);
 }
 
 .bgswitch-btn:hover {
@@ -909,6 +914,7 @@ select:focus-visible {
   cursor: pointer;
   padding: 0;
   background-size: cover;
+  transition: border-color var(--t-fast);
 }
 
 .bgswitch-swatch:hover {
@@ -929,8 +935,9 @@ select:focus-visible {
   background: var(--hover-soft);
   color: var(--text-soft);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   cursor: pointer;
+  transition: background var(--t-fast);
 }
 
 .bgswitch-image:hover {
@@ -968,6 +975,7 @@ select:focus-visible {
   font: inherit;
   font-size: var(--fs-sm);
   cursor: pointer;
+  transition: background var(--t-fast);
 }
 
 .promptbar-mode:hover {
@@ -1030,7 +1038,7 @@ select:focus-visible {
 
 .snips-row:hover {
   background: var(--hover-soft);
-  border-radius: 6px;
+  border-radius: var(--r-ctrl);
 }
 
 .snips-use {
@@ -1056,8 +1064,9 @@ select:focus-visible {
   border-radius: var(--r-ctrl);
   background: transparent;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: var(--fs-lg);
   cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
 }
 
 .snips-del:hover {
@@ -1067,7 +1076,7 @@ select:focus-visible {
 
 .snips-empty {
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: var(--fs-sm);
   padding: 8px;
 }
 
@@ -1082,6 +1091,7 @@ select:focus-visible {
   font: inherit;
   font-size: var(--fs-sm);
   cursor: pointer;
+  transition: background var(--t-fast);
 }
 
 .snips-save:hover:not(:disabled) {
@@ -1107,7 +1117,7 @@ select:focus-visible {
 
 .editor h1 {
   margin: 0 0 4px;
-  font-size: 18px;
+  font-size: var(--fs-xl);
   font-weight: 600;
   color: var(--accent);
 }
@@ -1119,7 +1129,7 @@ select:focus-visible {
 }
 
 .field > span {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--text-muted);
 }
 
@@ -1136,17 +1146,17 @@ select:focus-visible {
 .editor select {
   background: var(--surface-solid);
   border: 1px solid var(--border-solid);
-  border-radius: 6px;
+  border-radius: var(--r-ctrl);
   color: var(--text);
   font: inherit;
-  font-size: 13px;
-  padding: 7px 9px;
+  font-size: var(--fs-md);
+  padding: var(--space-2) var(--space-3);
 }
 
 .editor input:focus,
 .editor select:focus {
   outline: none;
-  border-color: #5cd6ae88;
+  border-color: var(--accent);
 }
 
 .accent-input,
@@ -1171,12 +1181,13 @@ select:focus-visible {
   flex-shrink: 0;
   background: var(--surface-2);
   border: 1px solid var(--surface-3);
-  border-radius: 6px;
+  border-radius: var(--r-ctrl);
   color: var(--text-soft);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   padding: 0 10px;
   cursor: pointer;
+  transition: background var(--t-fast);
 }
 
 .path-input button:hover,
@@ -1233,11 +1244,12 @@ select:focus-visible {
   width: 24px;
   height: 24px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--r-ctrl);
   background: transparent;
   color: var(--text-muted);
-  font-size: 16px;
+  font-size: var(--fs-lg);
   cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
 }
 
 .pane-del:hover {
@@ -1267,12 +1279,13 @@ select:focus-visible {
 .editor-actions button {
   background: var(--surface-2);
   border: 1px solid var(--surface-3);
-  border-radius: 7px;
+  border-radius: var(--r-ctrl);
   color: var(--text-soft);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   padding: 8px 16px;
   cursor: pointer;
+  transition: background var(--t-fast);
 }
 
 .editor-actions button:hover:not(:disabled) {
@@ -1313,12 +1326,13 @@ select:focus-visible {
 .editor-toolbar button {
   background: var(--surface-2);
   border: 1px solid var(--surface-3);
-  border-radius: 7px;
+  border-radius: var(--r-ctrl);
   color: var(--text-soft);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   padding: 7px 12px;
   cursor: pointer;
+  transition: background var(--t-fast);
 }
 
 .editor-toolbar button:hover {
@@ -1327,7 +1341,7 @@ select:focus-visible {
 
 .scan-panel {
   border: 1px solid var(--surface-3);
-  border-radius: 8px;
+  border-radius: var(--r-chip);
   background: var(--surface-solid);
   overflow: hidden;
 }
@@ -1350,12 +1364,13 @@ select:focus-visible {
 .scan-head button {
   background: var(--surface-2);
   border: 1px solid var(--surface-3);
-  border-radius: 6px;
+  border-radius: var(--r-ctrl);
   color: var(--text-soft);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   padding: 4px 9px;
   cursor: pointer;
+  transition: background var(--t-fast);
 }
 
 .scan-head button:disabled {
@@ -1374,7 +1389,7 @@ select:focus-visible {
   align-items: center;
   gap: 8px;
   padding: 4px 6px;
-  border-radius: 5px;
+  border-radius: var(--r-ctrl);
   font-size: 12px;
 }
 
@@ -1387,9 +1402,9 @@ select:focus-visible {
 }
 
 .scan-git {
-  font-size: 10px;
+  font-size: var(--fs-xs);
   color: var(--accent);
   background: rgba(92, 214, 174, 0.12);
-  border-radius: 4px;
+  border-radius: var(--r-ctrl);
   padding: 1px 5px;
 }
