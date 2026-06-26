@@ -59,13 +59,14 @@ export default function TaskNote({ workspaceId }: { workspaceId: string }) {
                 <span className="note-text-static">{t.text}</span>
                 <div className="note-actions">
                   <button
+                    className="icon-btn"
                     title="Send to focused card"
                     disabled={!focused}
                     onClick={() => inject(t.text)}
                   >
                     ▶
                   </button>
-                  <button title="Unpin from Next up" onClick={() => toggleNextUp(t.id)}>
+                  <button className="icon-btn" title="Unpin from Next up" onClick={() => toggleNextUp(t.id)}>
                     ★
                   </button>
                 </div>
@@ -163,21 +164,21 @@ function TaskRow({
       <div className="note-actions">
         <button
           title={task.nextUp ? "Unpin from Next up" : "Pin to Next up"}
-          className={task.nextUp ? "active" : ""}
+          className={task.nextUp ? "icon-btn active" : "icon-btn"}
           onClick={onToggleNextUp}
         >
           ★
         </button>
-        <button title="Send to focused card" disabled={!focused} onClick={onSend}>
+        <button className="icon-btn" title="Send to focused card" disabled={!focused} onClick={onSend}>
           ▶
         </button>
-        <button title="Move up" disabled={first} onClick={onUp}>
+        <button className="icon-btn" title="Move up" disabled={first} onClick={onUp}>
           ↑
         </button>
-        <button title="Move down" disabled={last} onClick={onDown}>
+        <button className="icon-btn" title="Move down" disabled={last} onClick={onDown}>
           ↓
         </button>
-        <button title="Delete" onClick={onRemove}>
+        <button className="icon-btn" title="Delete" onClick={onRemove}>
           ×
         </button>
       </div>
