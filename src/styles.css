@@ -381,6 +381,7 @@ select:focus-visible {
   width: 130px;
   background: transparent;
   border: none;
+  border-radius: var(--r-ctrl);
   color: var(--text);
   font: inherit;
   font-size: var(--fs-sm);
@@ -609,6 +610,7 @@ select:focus-visible {
   width: 100%;
   background: transparent;
   border: none;
+  border-radius: var(--r-ctrl);
   color: var(--text);
   font: inherit;
   padding: 4px;
@@ -988,6 +990,7 @@ select:focus-visible {
   max-height: 120px;
   background: transparent;
   border: none;
+  border-radius: var(--r-ctrl);
   color: var(--text);
   font: inherit;
   font-size: var(--fs-md);
