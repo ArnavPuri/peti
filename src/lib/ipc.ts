@@ -164,21 +164,34 @@ export function addWorkspacePointer(path: string): Promise<void> {
   return invoke("add_workspace_pointer", { path });
 }
 
-// ---- tasks ----------------------------------------------------------------
+// ---- plan (description + tasks) -------------------------------------------
 
 export interface Task {
   id: string;
   text: string;
   done: boolean;
   order: number;
+  priority: number; // 1 = P1 (highest), 2 = P2 (default), 3 = P3
+  labels: string[];
+  nextUp: boolean;
 }
 
-export function listTasks(id: string): Promise<Task[]> {
-  return invoke("list_tasks", { id });
+export interface Plan {
+  description: string;
+  tasks: Task[];
 }
 
-export function saveTasks(id: string, tasks: Task[]): Promise<void> {
-  return invoke("save_tasks", { id, tasks });
+export function getPlan(id: string): Promise<Plan> {
+  return invoke("get_plan", { id });
+}
+
+export function savePlan(id: string, plan: Plan): Promise<void> {
+  return invoke("save_plan", { id, plan });
+}
+
+// Mirror the plan into each Claude pane's `.peti/PLAN.md`.
+export function syncPlanMd(id: string): Promise<void> {
+  return invoke("sync_plan_md", { id });
 }
 
 // ---- editor (create / edit / delete) --------------------------------------
