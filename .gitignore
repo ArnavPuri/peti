@@ -13,3 +13,4 @@ src-tauri/gen/schemas
 # misc
 .DS_Store
 *.log
+.peti/
