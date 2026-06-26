@@ -139,7 +139,7 @@ export default function FloatingCard(props: Props) {
         )}
         {onClose && (
           <button
-            className="pane-card-close"
+            className="pane-card-close icon-btn"
             title="Close"
             onPointerDown={(e) => e.stopPropagation()}
             onClick={onClose}
