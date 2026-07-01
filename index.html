@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Peti — a calm desktop home for many small projects with Claude Code</title>
+  <meta name="description" content="Peti gives each project its own self-contained window: your repos as free-floating Claude Code terminals over a background you recognise, with a task note, a prompt bar, and at-a-glance status. Drives your own claude CLI — no API keys." />
+
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Peti — a calm home for juggling many small projects with Claude Code" />
+  <meta property="og:description" content="Each project in its own window: repos as free-floating Claude Code terminals over a background you recognise. Your own claude CLI, no API keys." />
+  <meta property="og:image" content="https://peti.arnavpuri.com/favicon.png" />
+  <meta property="og:url" content="https://peti.arnavpuri.com/" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+
+  <!-- ── Nav ─────────────────────────────────────────── -->
+  <header class="nav">
+    <a class="brand" href="#top">
+      <span class="brand-mark">📦</span>
+      <span class="brand-name">Peti</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#status">Status</a>
+      <a href="#build">Build</a>
+      <a class="btn btn-ghost btn-sm" href="https://github.com/ArnavPuri/peti" target="_blank" rel="noopener">
+        <span class="star">★</span> Star on GitHub
+      </a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- ── Hero ──────────────────────────────────────── -->
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <span class="eyebrow"><span class="dot dot-await"></span> pre-alpha · macOS · Linux</span>
+        <h1>A calm home for<br />the <em>many</em> small projects<br />you run with Claude&nbsp;Code.</h1>
+        <p class="lede">
+          Peti — Hindi for <em>box</em> — gives each project its own window. Your repos run as
+          free-floating Claude&nbsp;Code terminals over a background you recognise, with a task
+          note, a prompt bar, and at-a-glance status so you can tell which Claude is working and
+          which one needs you.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-accent" href="https://github.com/ArnavPuri/peti" target="_blank" rel="noopener">
+            View on GitHub
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 11.5 11.5 4.5M11.5 4.5H5.5M11.5 4.5V10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#build">Build from source ↓</a>
+        </div>
+        <p class="micro">Drives <strong>your own <code>claude</code> CLI</strong> over a real PTY — no API keys, no separate model config.</p>
+      </div>
+
+      <!-- Hand-built mockup of a borderless Peti window -->
+      <div class="stage reveal" aria-hidden="true">
+        <div class="window">
+          <div class="wallpaper"></div>
+
+          <div class="dock">
+            <span class="chip chip-active">api</span>
+            <span class="chip">web</span>
+            <span class="chip">shell</span>
+            <span class="chip chip-plus">＋</span>
+          </div>
+
+          <div class="card card-a">
+            <div class="card-bar">
+              <span class="git"><span class="branch">main</span><span class="dirty"></span></span>
+              <span class="card-label">api</span>
+              <span class="status status-working" title="working"></span>
+            </div>
+            <div class="card-body">
+              <p class="ln"><span class="glyph">✳</span> Refactoring the PTY reader thread…</p>
+              <p class="ln dim">· Edited <span class="path">src-tauri/src/pty.rs</span></p>
+              <p class="ln dim">· Running <span class="path">cargo test --lib</span></p>
+              <p class="ln accent">✔ 24 passed</p>
+              <p class="ln caret">›&nbsp;<span class="cur"></span></p>
+            </div>
+          </div>
+
+          <div class="card card-b">
+            <div class="card-bar">
+              <span class="git"><span class="branch">feat/ui</span></span>
+              <span class="card-label">web</span>
+              <span class="status status-await" title="awaiting you"></span>
+            </div>
+            <div class="card-body">
+              <p class="ln">Ready when you are — should I open a PR</p>
+              <p class="ln">for the tokenised styles, or keep polishing?</p>
+              <p class="ln await-tag">awaiting your reply</p>
+            </div>
+          </div>
+
+          <div class="promptbar">
+            <span class="prompt-ph">Send to <b>api</b>…</span>
+            <span class="prompt-send">↩</span>
+          </div>
+        </div>
+        <div class="stage-glow"></div>
+      </div>
+    </section>
+
+    <!-- ── Differentiator strip ──────────────────────── -->
+    <section class="strip reveal">
+      <p>
+        <span class="strip-key">Your auth, not ours.</span>
+        Each card is the actual <code>claude</code> binary in its repo, spoken to over a real
+        pseudo-terminal. Peti runs entirely on the subscription you already have —
+        <b>no API keys, no config to duplicate, no middleman.</b>
+      </p>
+    </section>
+
+    <!-- ── Features ──────────────────────────────────── -->
+    <section id="features" class="features">
+      <header class="sec-head reveal">
+        <span class="sec-kicker">What's inside the box</span>
+        <h2>Built for juggling, not context-switching.</h2>
+      </header>
+
+      <ol class="feature-list">
+        <li class="reveal">
+          <span class="num">01</span>
+          <div>
+            <h3>One window per Peti</h3>
+            <p>Open a project and you're <em>inside</em> it — two or three repos as draggable, resizable, translucent terminal cards over a full-bleed background. No switcher, no tab soup.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="num">02</span>
+          <div>
+            <h3>Real Claude Code, your auth</h3>
+            <p>Every card is the genuine <code>claude</code> CLI in its repo. Insert / send prompt modes, bracketed-paste so multi-line never mis-submits, and <code>--continue</code> resume panes.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="num">03</span>
+          <div>
+            <h3>Know who needs you</h3>
+            <p>Per-card <span class="pill pill-work">working</span> / <span class="pill pill-await">awaiting</span> badges read from Claude's own transcript — plus a menubar count across <em>all</em> Petis and a chime when one finishes.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="num">04</span>
+          <div>
+            <h3>A plan that Claude can read</h3>
+            <p>A floating note per project holds a description and tasks with priority, labels, and a pinned <em>Next up</em> — mirrored one-way into <code>.peti/PLAN.md</code> in each pane's repo so Claude knows what's next.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="num">05</span>
+          <div>
+            <h3>A dock for your cards</h3>
+            <p>A slim rail of every card — click to raise or reopen, and a <b>＋</b> to spawn a new Claude, shell, or read-only code-viewer card on the fly.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="num">06</span>
+          <div>
+            <h3>Make it yours</h3>
+            <p>Per-Peti background (bundled wallpapers, gradient presets, or your own image, swapped live), an accent colour, and light / dark / system themes. Per-Peti launchers put a project one click from your Dock.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ── Status ────────────────────────────────────── -->
+    <section id="status" class="status-sec">
+      <header class="sec-head reveal">
+        <span class="sec-kicker">Honest about where it is</span>
+        <h2>Young, unsigned, moving fast.</h2>
+        <p class="sec-sub">Usable day-to-day on macOS — but back up nothing you can't lose.</p>
+      </header>
+
+      <div class="status-grid reveal">
+        <div class="status-row"><span class="s-ico ok">✅</span><div><b>Core</b><span>Windows, cards, Claude panes, planning + <code>PLAN.md</code> sync, prompt bar, resume</span></div></div>
+        <div class="status-row"><span class="s-ico ok">✅</span><div><b>Identity</b><span>Backgrounds, wallpapers, themes, in-app editor</span></div></div>
+        <div class="status-row"><span class="s-ico ok">✅</span><div><b>Awareness</b><span>Status badges, tray count, notifications, dock</span></div></div>
+        <div class="status-row"><span class="s-ico ok">✅</span><div><b>macOS build</b><span>Packaged <code>.app</code> / <code>.dmg</code></span></div></div>
+        <div class="status-row"><span class="s-ico no">⛔</span><div><b>Signing</b><span>Code-signing / notarization, auto-update — not yet</span></div></div>
+        <div class="status-row"><span class="s-ico wip">⚙️</span><div><b>Linux</b><span>AppImage / <code>.deb</code> configured, unverified (no CI yet)</span></div></div>
+      </div>
+    </section>
+
+    <!-- ── Build ─────────────────────────────────────── -->
+    <section id="build" class="build-sec">
+      <header class="sec-head reveal">
+        <span class="sec-kicker">No releases yet</span>
+        <h2>Build it from source.</h2>
+        <p class="sec-sub">You'll need <a href="https://rustup.rs/" target="_blank" rel="noopener">Rust</a>, <a href="https://bun.sh/" target="_blank" rel="noopener">Bun</a>, and the <a href="https://docs.claude.com/en/docs/claude-code" target="_blank" rel="noopener"><code>claude</code> CLI</a> already logged in.</p>
+      </header>
+
+      <div class="terminal reveal">
+        <div class="term-bar">
+          <span class="tl"></span><span class="tl"></span><span class="tl"></span>
+          <span class="term-title">zsh — peti</span>
+          <button class="copy" id="copyBtn" type="button">Copy</button>
+        </div>
+        <pre class="term-body" id="cmd"><span class="cmt"># clone & install</span>
+<span class="p">$</span> git clone https://github.com/ArnavPuri/peti.git
+<span class="p">$</span> cd peti
+<span class="p">$</span> bun install
+
+<span class="cmt"># run in dev — or `bun run tauri build` to package</span>
+<span class="p">$</span> bun run tauri dev</pre>
+      </div>
+
+      <div class="build-cta reveal">
+        <a class="btn btn-accent" href="https://github.com/ArnavPuri/peti" target="_blank" rel="noopener">Open the repo</a>
+        <a class="btn btn-ghost" href="https://github.com/ArnavPuri/peti/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── Footer ──────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="foot-brand"><span>📦</span> Peti</div>
+    <p class="foot-legal">
+      MIT © 2026 Arnav Puri · Built on <a href="https://tauri.app" target="_blank" rel="noopener">Tauri</a>,
+      <a href="https://xtermjs.org" target="_blank" rel="noopener">xterm.js</a> &amp;
+      <a href="https://github.com/wez/wezterm/tree/main/pty" target="_blank" rel="noopener">portable-pty</a>.
+      <br />Peti only ever drives the real <code>claude</code> binary — it is not affiliated with Anthropic.
+    </p>
+    <a class="foot-gh" href="https://github.com/ArnavPuri/peti" target="_blank" rel="noopener">github.com/ArnavPuri/peti ↗</a>
+  </footer>
+
+  <script>
+    // Copy the build command
+    const btn = document.getElementById('copyBtn');
+    btn?.addEventListener('click', async () => {
+      const cmds = [
+        'git clone https://github.com/ArnavPuri/peti.git',
+        'cd peti',
+        'bun install',
+        'bun run tauri dev',
+      ].join('\n');
+      try {
+        await navigator.clipboard.writeText(cmds);
+        btn.textContent = 'Copied';
+        setTimeout(() => (btn.textContent = 'Copy'), 1600);
+      } catch { btn.textContent = 'Copy failed'; }
+    });
+
+    // Staggered reveal on scroll
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      document.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
+    } else {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    }
+  </script>
+</body>
+</html>
